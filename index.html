@@ -1729,6 +1729,35 @@
             }
             return url;
         }
+ 
+         function getDriveFileId(url) {
+             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+             return match && match[1] ? match[1] : null;
+         }
+ 
+         async function extractCoverFromExternalUrl(url) {
+             if (!url) return;
+             const driveId = url.includes('drive.google.com') ? getDriveFileId(url) : null;
+             if (driveId) {
+                 window.currentUploadCover = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000`;
+                 return;
+             }
+             try {
+                 const formatted = formatExternalUrl(url);
+                 const loadingTask = pdfjsLib.getDocument(formatted);
+                 const doc = await loadingTask.promise;
+                 const page = await doc.getPage(1);
+                 const viewport = page.getViewport({ scale: 0.5 });
+                 const c = document.createElement('canvas');
+                 const cx = c.getContext('2d');
+                 c.height = viewport.height;
+                 c.width = viewport.width;
+                 await page.render({ canvasContext: cx, viewport }).promise;
+                 window.currentUploadCover = c.toDataURL('image/jpeg', 0.8);
+             } catch (e) {
+                 window.currentUploadCover = null;
+             }
+         }
 
         // IndexedDB for storing files
         function initDB() {
@@ -2961,6 +2990,15 @@
             dropArea.innerHTML = `<i class="fas fa-check-circle" style="color: green; font-size: 3rem;"></i><p>${file.name} analisado com sucesso! Capa extraída.</p>`;
         }
 
+        const formUrlInput = document.getElementById('form-url');
+        if (formUrlInput) {
+            formUrlInput.addEventListener('change', async (e) => {
+                const url = e.target.value.trim();
+                if (!url) return;
+                await extractCoverFromExternalUrl(url);
+            });
+        }
+
         document.getElementById('book-form').onsubmit = async (e) => {
             e.preventDefault();
             
@@ -2982,7 +3020,7 @@
                 tags: document.getElementById('form-tags').value,
                 download: document.getElementById('form-allow-download').checked,
                 public: document.getElementById('form-public').checked,
-                cover: window.currentUploadCover || null, // SAVE THE EXTRACTED COVER
+                cover: window.currentUploadCover || null,
                 views: 0,
                 dateAdded: Date.now()
             };
