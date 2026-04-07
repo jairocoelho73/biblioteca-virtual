@@ -1206,8 +1206,6 @@
                                 <li class="active" onclick="showAdminTab('dash')"><i class="fas fa-chart-line"></i> Dashboard</li>
                                 <li onclick="showAdminTab('upload')"><i class="fas fa-plus-circle"></i> Novo Livro</li>
                                 <li onclick="showAdminTab('upload-mp3')"><i class="fas fa-music"></i> Novo Mp3</li>
-                                <li onclick="showAdminTab('upload-video')"><i class="fas fa-video"></i> Novo Vídeo</li>
-                                <li onclick="showAdminTab('drive')"><i class="fab fa-google-drive"></i> Google Drive</li>
                                 <li onclick="showAdminTab('manage')"><i class="fas fa-tasks"></i> Gerenciar Acervo</li>
                                 <li onclick="showAdminTab('audit')"><i class="fas fa-history"></i> Auditoria</li>
                                 <li onclick="logoutAdmin()" style="margin-top: 20px; color: #e74c3c"><i class="fas fa-sign-out-alt"></i> Sair</li>
@@ -1240,35 +1238,14 @@
                                 </div>
                             </div>
 
-                            <!-- Google Drive Tab -->
-                            <div id="tab-drive" class="hidden">
-                                <h3>Importar do Google Drive</h3>
-                                <div style="background: var(--bg); padding: 20px; border-radius: 12px; margin-bottom: 30px;">
-                                    <p style="margin-bottom: 15px;">Para conectar, você precisa de um <strong>Client ID</strong> e uma <strong>API Key</strong> do Google Cloud Console.</p>
-                                    <div class="form-group">
-                                        <label>Client ID</label>
-                                        <input type="text" id="drive-client-id" placeholder="Ex: 12345-abcde.apps.googleusercontent.com">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>API Key</label>
-                                        <input type="text" id="drive-api-key" placeholder="Ex: AIzaSyA12345...">
-                                    </div>
-                                    <button class="btn btn-primary" onclick="saveDriveConfig()">Salvar Configuração</button>
-                                </div>
-                                <div id="drive-actions" class="hidden">
-                                    <button class="btn btn-primary" onclick="handleAuthClick()" id="btn-drive-auth">
-                                        <i class="fab fa-google-drive"></i> Conectar & Selecionar PDFs
-                                    </button>
-                                    <p id="drive-status" style="margin-top: 10px; font-size: 0.9rem;"></p>
-                                </div>
-                            </div>
+                            <!-- Google Drive Tab removido -->
 
                             <!-- Upload Mp3 Tab -->
                             <div id="tab-upload-mp3" class="hidden">
                                 <h3>Adicionar Novo Mp3</h3>
                                 <div class="upload-area" id="drop-area-mp3">
                                     <i class="fas fa-music" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i>
-                                    <p>Arraste o arquivo MP3 aqui ou clique para selecionar</p>
+                                    <p>Opcional: arraste o arquivo MP3 aqui ou clique para selecionar (ou informe apenas o link externo abaixo)</p>
                                     <input type="file" id="mp3-file-input" hidden accept=".mp3">
                                 </div>
 
@@ -1315,48 +1292,7 @@
                                 </form>
                             </div>
 
-                            <!-- Upload Video Tab -->
-                            <div id="tab-upload-video" class="hidden">
-                                <h3>Adicionar Novo Vídeo</h3>
-                                <div class="upload-area" id="drop-area-video">
-                                    <i class="fas fa-video" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i>
-                                    <p>Arraste o arquivo MP4 aqui ou clique para selecionar</p>
-                                    <input type="file" id="video-file-input" hidden accept=".mp4">
-                                </div>
-
-                                <form id="video-form">
-                                    <div class="form-grid">
-                                        <div class="form-group">
-                                            <label>Título *</label>
-                                            <input type="text" id="video-form-title" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Turma (Formação) *</label>
-                                            <select id="video-form-turma" class="turma-select-input" required>
-                                                <option value="">Selecione a Turma</option>
-                                                <!-- Dynamic Turmas -->
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Módulo *</label>
-                                            <input type="text" id="video-form-modulo" class="modulo-select-input" required placeholder="Ex: Módulo 1, Aula 5, etc.">
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Ano</label>
-                                            <input type="number" id="video-form-year">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Link Externo (Google Drive / URL direta)</label>
-                                        <input type="url" id="video-form-url" placeholder="https://drive.google.com/file/d/ID/view?usp=sharing">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Descrição</label>
-                                        <textarea id="video-form-description" rows="3"></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Salvar Vídeo</button>
-                                </form>
-                            </div>
+                            <!-- Upload Video Tab removido -->
 
                             <!-- Upload Tab -->
                             <div id="tab-upload" class="hidden">
@@ -2642,7 +2578,6 @@
                 document.getElementById('admin-login-view').classList.add('hidden');
                 document.getElementById('admin-dashboard-view').classList.remove('hidden');
                 updateAdminDashboard();
-                checkDriveConfig();
                 startSessionTimer();
                 addAuditLog('LOGIN', `Login realizado com sucesso como ${role}.`);
                 
@@ -2671,7 +2606,7 @@
 
         function showAdminTab(tab) {
             // Check permissions for specific tabs
-            if ((tab === 'audit' || tab === 'drive') && currentUserRole !== 'ADMIN') {
+            if (tab === 'audit' && currentUserRole !== 'ADMIN') {
                 alert("Acesso negado. Esta funcionalidade é exclusiva para administradores.");
                 return;
             }
@@ -2679,8 +2614,6 @@
             document.getElementById('tab-dash').classList.add('hidden');
             document.getElementById('tab-upload').classList.add('hidden');
             document.getElementById('tab-upload-mp3').classList.add('hidden');
-            document.getElementById('tab-upload-video').classList.add('hidden');
-            document.getElementById('tab-drive').classList.add('hidden');
             document.getElementById('tab-manage').classList.add('hidden');
             document.getElementById('tab-audit').classList.add('hidden');
             
@@ -2690,10 +2623,8 @@
                 'dash': { el: 'tab-dash', nav: 1 },
                 'upload': { el: 'tab-upload', nav: 2 },
                 'upload-mp3': { el: 'tab-upload-mp3', nav: 3 },
-                'upload-video': { el: 'tab-upload-video', nav: 4 },
-                'drive': { el: 'tab-drive', nav: 5 },
-                'manage': { el: 'tab-manage', nav: 6 },
-                'audit': { el: 'tab-audit', nav: 7 }
+                'manage': { el: 'tab-manage', nav: 4 },
+                'audit': { el: 'tab-audit', nav: 5 }
             };
 
             const target = tabMap[tab];
