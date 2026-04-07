@@ -15,8 +15,8 @@
     <script src="https://apis.google.com/js/api.js" async defer></script>
     <style>
         :root {
-            --primary: #5e1d1d; /* Vinho */
-            --secondary: #d4af37; /* Dourado */
+            --primary: #367962; /* Vinho */
+            --secondary: #96c4ba; /* Dourado */
             --bg-light: #fdf5e6; /* Creme */
             --text-light: #333;
             --card-bg-light: #fff;
@@ -114,8 +114,9 @@
         }
 
         .logo-icon {
-            font-size: 2rem;
-            color: var(--secondary);
+            height: 50px;
+            width: auto;
+            object-fit: contain;
         }
 
         nav ul {
@@ -159,7 +160,7 @@
         /* --- HERO --- */
         .hero {
             height: 500px;
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background: url('banner.png');
             background-size: cover;
             background-position: center;
             display: flex;
@@ -168,6 +169,7 @@
             text-align: center;
             color: #fff;
             padding: 0 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
         .hero-content h1 {
@@ -513,6 +515,45 @@
             color: #fff;
         }
 
+        /* --- LGPD BANNER --- */
+        .lgpd-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 3000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            border-left: 5px solid var(--primary);
+        }
+
+        .lgpd-content p {
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .lgpd-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-admin { background-color: var(--primary); color: #fff; }
+        .badge-op { background-color: var(--secondary); color: #fff; }
+
         .admin-content {
             background-color: var(--card-bg);
             padding: 30px;
@@ -592,6 +633,255 @@
 
         .btn-edit { background-color: #3498db; color: #fff; }
         .btn-delete { background-color: #e74c3c; color: #fff; }
+
+        /* --- MP3 GRID & PLAYER --- */
+        .mp3-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .mp3-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .mp3-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .mp3-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            background: rgba(94, 29, 29, 0.1);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .mp3-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+
+        .mp3-info p {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .mp3-player-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-play {
+            background-color: var(--primary);
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .audio-progress {
+            flex-grow: 1;
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .audio-progress-bar {
+            height: 100%;
+            background: var(--secondary);
+            border-radius: 2px;
+            width: 0%;
+        }
+
+        /* --- FORMAÇÃO PAGE & TURMAS --- */
+        .turmas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .turma-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .turma-card:hover {
+            border-color: var(--secondary);
+            transform: translateY(-10px);
+        }
+
+        .turma-avatar {
+            width: 70px;
+            height: 70px;
+            background-color: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(94, 29, 29, 0.3);
+        }
+
+        .turma-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .turma-desc {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .modules-section {
+            margin-top: 50px;
+        }
+
+        .module-block {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .module-header {
+            background-color: rgba(94, 29, 29, 0.05);
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .module-content {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .content-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 8px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .content-item:hover {
+            background: rgba(212, 175, 55, 0.1);
+            transform: translateX(5px);
+        }
+
+        .content-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #fff;
+        }
+
+        .icon-pdf { background-color: #e74c3c; }
+        .icon-mp3 { background-color: #3498db; }
+        .icon-video { background-color: #9b59b6; }
+
+        .content-info h4 {
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .content-info p {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        /* --- VIDEO PLAYER --- */
+        .video-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 2500;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-container {
+            width: 90%;
+            max-width: 1000px;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            display: block;
+        }
+
+        .video-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
 
         /* --- PDF VIEWER MODAL --- */
         .pdf-modal {
@@ -698,15 +988,17 @@
     <header>
         <div class="container header-content">
             <a href="#" class="logo" onclick="showSection('home')">
-                <i class="fas fa-book-journal-whills logo-icon"></i>
+                <img src="logo.png" alt="Logo" class="logo-icon">
                 <span class="logo-text">Biblioteca <span style="color: var(--secondary)">Virtual</span></span>
             </a>
             <nav>
                 <ul>
                     <li><a href="#" class="nav-link active" onclick="showSection('home', this)">Início</a></li>
-                    <li><a href="#" class="nav-link" onclick="showSection('acervo', this)">Acervo</a></li>
-                    <li><a href="#" class="nav-link" onclick="showSection('categorias', this)">Categorias</a></li>
-                    <li><a href="#" class="nav-link" onclick="showSection('sobre', this)">Sobre</a></li>
+                    <li><a href="#" class="nav-link" onclick="showSection('formacao', this)">Formação</a></li>
+                    <li><a href="#" class="nav-link" onclick="showSection('acervo', this)"></a></li>
+                    <li><a href="#" class="nav-link" onclick="showSection('acervo-mp3', this)"></a></li>
+                    <li><a href="#" class="nav-link" onclick="showSection('categorias', this)"></a></li>
+                    <li><a href="#" class="nav-link" onclick="showSection('sobre', this)"></a></li>
                     <li><a href="#" class="nav-link" onclick="showSection('admin', this)">Admin</a></li>
                 </ul>
             </nav>
@@ -765,6 +1057,32 @@
             </div>
         </section>
 
+        <!-- FORMAÇÃO SECTION -->
+        <section id="formacao" class="hidden">
+            <div class="container">
+                <h2 class="section-title">Programa de Qualificação</h2>
+                
+                <div id="turmas-selection-view">
+                    <p style="text-align: center; margin-bottom: 30px;">Selecione sua turma para acessar os conteúdos exclusivos:</p>
+                    <div id="turmas-grid" class="turmas-grid">
+                        <!-- Turmas Cards -->
+                    </div>
+                </div>
+
+                <div id="turma-content-view" class="hidden">
+                    <button onclick="showTurmasSelection()" style="margin-bottom: 30px; background: none; color: var(--primary); font-weight: 600;">
+                        <i class="fas fa-arrow-left"></i> Voltar para Turmas
+                    </button>
+                    <h2 id="selected-turma-name" style="color: var(--primary); margin-bottom: 10px;">Nome da Turma</h2>
+                    <p id="selected-turma-desc" style="margin-bottom: 40px; color: #777;">Descrição da turma...</p>
+                    
+                    <div id="modules-container" class="modules-section">
+                        <!-- Modules and Content -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- ACERVO SECTION -->
         <section id="acervo" class="hidden">
             <div class="container">
@@ -808,6 +1126,29 @@
             </div>
         </section>
 
+        <!-- ACERVO MP3 SECTION -->
+        <section id="acervo-mp3" class="hidden">
+            <div class="container">
+                <h2 class="section-title">Acervo Mp3</h2>
+                
+                <div class="filters-bar">
+                    <div class="search-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-mp3-input" placeholder="Buscar por título ou artista..." oninput="filterMp3()">
+                    </div>
+                </div>
+
+                <div id="mp3-grid" class="mp3-grid">
+                    <!-- Mp3 Files -->
+                </div>
+                
+                <div id="no-mp3-results" class="hidden" style="text-align: center; padding: 50px;">
+                    <i class="fas fa-music" style="font-size: 3rem; color: #ccc; margin-bottom: 20px;"></i>
+                    <p>Nenhum arquivo MP3 encontrado.</p>
+                </div>
+            </div>
+        </section>
+
         <!-- CATEGORIES SECTION -->
         <section id="categorias" class="hidden">
             <div class="container">
@@ -824,7 +1165,7 @@
                 <h2 class="section-title">Sobre a Bibliotheca</h2>
                 <div style="max-width: 800px; margin: 0 auto; text-align: center;">
                     <p style="font-size: 1.2rem; margin-bottom: 30px;">
-                        A Bibliotheca Premium é um projeto dedicado à preservação e disseminação do conhecimento digital. 
+                        A Bibliotheca Virtual é um projeto dedicado à preservação e disseminação do conhecimento digital. 
                         Nossa missão é oferecer uma experiência de leitura sofisticada, acessível e organizada.
                     </p>
                     <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Library" style="width: 100%; border-radius: 12px; margin-bottom: 30px;">
@@ -835,7 +1176,7 @@
                         </div>
                         <div>
                             <h3>Tecnologia</h3>
-                            <p>Desenvolvida com as mais modernas APIs da web, garantindo performance e privacidade (todos os dados ficam no seu navegador).</p>
+                            <p>Desenvolvida com as mais modernas APIs da web, garantindo performance e privacidade.</p>
                         </div>
                     </div>
                 </div>
@@ -881,8 +1222,11 @@
                             <ul class="admin-nav">
                                 <li class="active" onclick="showAdminTab('dash')"><i class="fas fa-chart-line"></i> Dashboard</li>
                                 <li onclick="showAdminTab('upload')"><i class="fas fa-plus-circle"></i> Novo Livro</li>
+                                <li onclick="showAdminTab('upload-mp3')"><i class="fas fa-music"></i> Novo Mp3</li>
+                                <li onclick="showAdminTab('upload-video')"><i class="fas fa-video"></i> Novo Vídeo</li>
                                 <li onclick="showAdminTab('drive')"><i class="fab fa-google-drive"></i> Google Drive</li>
                                 <li onclick="showAdminTab('manage')"><i class="fas fa-tasks"></i> Gerenciar Acervo</li>
+                                <li onclick="showAdminTab('audit')"><i class="fas fa-history"></i> Auditoria</li>
                                 <li onclick="logoutAdmin()" style="margin-top: 20px; color: #e74c3c"><i class="fas fa-sign-out-alt"></i> Sair</li>
                             </ul>
                         </div>
@@ -896,8 +1240,12 @@
                                         <p>Total de Obras</p>
                                     </div>
                                     <div class="stat-item" style="background: var(--bg); padding: 20px; border-radius: 12px; flex: 1; min-width: 150px;">
+                                        <h2 id="dash-total-mp3" style="color: var(--primary)">0</h2>
+                                        <p>Total de Mp3</p>
+                                    </div>
+                                    <div class="stat-item" style="background: var(--bg); padding: 20px; border-radius: 12px; flex: 1; min-width: 150px;">
                                         <h2 id="dash-total-cats" style="color: var(--primary)">0</h2>
-                                        <p>Categorias</p>
+                                        <p>Total de Vídeos</p>
                                     </div>
                                 </div>
                                 <div style="margin-top: 40px;">
@@ -930,6 +1278,92 @@
                                     </button>
                                     <p id="drive-status" style="margin-top: 10px; font-size: 0.9rem;"></p>
                                 </div>
+                            </div>
+
+                            <!-- Upload Mp3 Tab -->
+                            <div id="tab-upload-mp3" class="hidden">
+                                <h3>Adicionar Novo Mp3</h3>
+                                <div class="upload-area" id="drop-area-mp3">
+                                    <i class="fas fa-music" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i>
+                                    <p>Arraste o arquivo MP3 aqui ou clique para selecionar</p>
+                                    <input type="file" id="mp3-file-input" hidden accept=".mp3">
+                                </div>
+
+                                <form id="mp3-form">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Título *</label>
+                                            <input type="text" id="mp3-form-title" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Artista *</label>
+                                            <input type="text" id="mp3-form-artist" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Álbum</label>
+                                            <input type="text" id="mp3-form-album">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Ano</label>
+                                            <input type="number" id="mp3-form-year">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Turma (Formação)</label>
+                                            <select id="mp3-form-turma" class="turma-select-input">
+                                                <option value="">Nenhuma (Acervo Geral)</option>
+                                                <!-- Dynamic Turmas -->
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Módulo</label>
+                                            <input type="text" id="mp3-form-modulo" class="modulo-select-input" placeholder="Ex: Módulo 1, Aula 5, etc.">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Descrição</label>
+                                        <textarea id="mp3-form-description" rows="3"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Salvar Mp3</button>
+                                </form>
+                            </div>
+
+                            <!-- Upload Video Tab -->
+                            <div id="tab-upload-video" class="hidden">
+                                <h3>Adicionar Novo Vídeo</h3>
+                                <div class="upload-area" id="drop-area-video">
+                                    <i class="fas fa-video" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i>
+                                    <p>Arraste o arquivo MP4 aqui ou clique para selecionar</p>
+                                    <input type="file" id="video-file-input" hidden accept=".mp4">
+                                </div>
+
+                                <form id="video-form">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Título *</label>
+                                            <input type="text" id="video-form-title" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Turma (Formação) *</label>
+                                            <select id="video-form-turma" class="turma-select-input" required>
+                                                <option value="">Selecione a Turma</option>
+                                                <!-- Dynamic Turmas -->
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Módulo *</label>
+                                            <input type="text" id="video-form-modulo" class="modulo-select-input" required placeholder="Ex: Módulo 1, Aula 5, etc.">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Ano</label>
+                                            <input type="number" id="video-form-year">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Descrição</label>
+                                        <textarea id="video-form-description" rows="3"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Salvar Vídeo</button>
+                                </form>
                             </div>
 
                             <!-- Upload Tab -->
@@ -966,6 +1400,17 @@
                                                 <option value="Arte">Arte</option>
                                                 <option value="Outros">Outros</option>
                                             </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Turma (Formação)</label>
+                                            <select id="form-turma" class="turma-select-input">
+                                                <option value="">Nenhuma (Acervo Geral)</option>
+                                                <!-- Dynamic Turmas -->
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Módulo</label>
+                                            <input type="text" id="form-modulo" class="modulo-select-input" placeholder="Ex: Módulo 1, Aula 5, etc.">
                                         </div>
                                         <div class="form-group">
                                             <label>Ano de Publicação</label>
@@ -1024,12 +1469,45 @@
                                     </table>
                                 </div>
                             </div>
+
+                            <!-- Audit Tab -->
+                            <div id="tab-audit" class="hidden">
+                                <h3>Logs de Auditoria</h3>
+                                <div class="admin-table-container">
+                                    <table id="audit-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Data/Hora</th>
+                                                <th>Usuário</th>
+                                                <th>Ação</th>
+                                                <th>Detalhes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Dynamic Audit Content -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div style="margin-top: 20px;">
+                                    <button class="btn btn-delete btn-sm" onclick="clearAuditLogs()">Limpar Logs (Admin)</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
+
+    <!-- LGPD BANNER -->
+    <div id="lgpd-banner" class="lgpd-banner hidden">
+        <div class="lgpd-content">
+            <p><strong>Privacidade e LGPD:</strong> Utilizamos armazenamento local para salvar suas preferências e o acervo da biblioteca. Ao continuar, você concorda com o uso de dados estritamente necessários para o funcionamento do sistema.</p>
+        </div>
+        <div class="lgpd-actions">
+            <button class="btn btn-primary btn-sm" onclick="acceptLGPD()">Aceitar</button>
+        </div>
+    </div>
 
     <!-- PDF VIEWER MODAL -->
     <div id="pdf-viewer" class="pdf-modal">
@@ -1053,12 +1531,22 @@
         </div>
     </div>
 
+    <!-- VIDEO VIEWER MODAL -->
+    <div id="video-viewer" class="video-modal">
+        <div class="video-container">
+            <button class="video-close" onclick="closeVideoViewer()"><i class="fas fa-times"></i> Fechar</button>
+            <video id="video-player" controls controlsList="nodownload">
+                Seu navegador não suporta a reprodução de vídeos.
+            </video>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-logo">
                     <div class="logo">
-                        <i class="fas fa-book-journal-whills logo-icon"></i>
+                        <img src="logo.png" alt="Logo" class="logo-icon">
                         <span class="logo-text">Bibliotheca <span style="color: var(--secondary)">Premium</span></span>
                     </div>
                     <p>O luxo da leitura digital ao seu alcance.</p>
@@ -1068,6 +1556,7 @@
                     <ul>
                         <li><a href="#" onclick="showSection('home')">Início</a></li>
                         <li><a href="#" onclick="showSection('acervo')">Acervo</a></li>
+                        <li><a href="#" onclick="showSection('acervo-mp3')">Acervo Mp3</a></li>
                         <li><a href="#" onclick="showSection('categorias')">Categorias</a></li>
                     </ul>
                 </div>
@@ -1087,7 +1576,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                &copy; 2026 Bibliotheca Premium. Todos os direitos reservados.
+                &copy; 2026 Bibliotheca Virtual. Todos os direitos reservados.
             </div>
         </div>
     </footer>
@@ -1095,12 +1584,29 @@
     <script>
         // --- DATA & CONFIG ---
         let books = [];
+        let mp3Files = [];
+        let videos = [];
         let db;
         const DB_NAME = 'LibraryDB';
         const STORE_NAME = 'books_files';
+        const STORE_NAME_MP3 = 'mp3_files';
+        const STORE_NAME_VIDEOS = 'video_files';
         const ADMIN_USER = 'admin';
-        const ADMIN_PASS = 'biblioteca2024';
+        const ADMIN_PASS = 'biblioteca2024'; // Admin Password
+        const OPERATOR_PASS = 'ope2024';      // Operator Password
         let isAdminAuthenticated = false;
+        let currentUserRole = 'CONSULTA';
+        let sessionTimeout = null;
+        const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours as per security requirements
+
+        const TURMAS = [
+            { id: 'asg', name: 'ASG - 2ª Turma', desc: 'TMIE - Auxiliar de Serviços Gerais', initial: 'A' },
+            { id: 'tae', name: 'TAE - 2ª Turma', desc: 'Técnico Administrativo Escolar', initial: 'T' },
+            { id: 'tmd', name: 'TMD - 2ª Turma', desc: 'Técnico em Multimeios Didáticos', initial: 'T' },
+            { id: 'motorista', name: 'MOTORISTA - 2ª Turma', desc: 'TMIE - Motorista', initial: 'M' },
+            { id: 'vigilante', name: 'VIGILANTE - 2ª Turma', desc: 'TMIE - Vigilante', initial: 'V' },
+            { id: 'tne', name: 'TNE - 2ª Turma', desc: 'Técnico em Nutrição Escolar', initial: 'T' }
+        ];
 
         const CATEGORIES = [
             { name: 'Literatura', icon: 'fa-feather-pointed' },
@@ -1122,6 +1628,8 @@
             loadBooks();
             renderCategories();
             updateStats();
+            checkLGPD();
+            restoreSession();
             
             // Check for system theme
             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -1129,13 +1637,104 @@
             }
         });
 
+        // --- SECURITY & AUDIT LOGS ---
+        function addAuditLog(action, details) {
+            const logs = JSON.parse(localStorage.getItem('library_audit_logs') || '[]');
+            const logEntry = {
+                timestamp: new Date().toLocaleString('pt-BR'),
+                user: currentUserRole === 'ADMIN' ? 'Administrador' : (currentUserRole === 'OPERADOR' ? 'Operador' : 'Sistema'),
+                action: sanitizeInput(action),
+                details: sanitizeInput(details)
+            };
+            logs.unshift(logEntry);
+            localStorage.setItem('library_audit_logs', JSON.stringify(logs.slice(0, 1000))); // Limit to 1000 entries
+            if (isAdminAuthenticated && document.getElementById('tab-audit')) renderAuditTable();
+        }
+
+        function renderAuditTable() {
+            const tbody = document.querySelector('#audit-table tbody');
+            if (!tbody) return;
+            const logs = JSON.parse(localStorage.getItem('library_audit_logs') || '[]');
+            tbody.innerHTML = logs.map(log => `
+                <tr>
+                    <td>${log.timestamp}</td>
+                    <td><span class="badge ${log.user === 'Administrador' ? 'badge-admin' : 'badge-op'}">${log.user}</span></td>
+                    <td>${log.action}</td>
+                    <td><small>${log.details}</small></td>
+                </tr>
+            `).join('');
+        }
+
+        function clearAuditLogs() {
+            if (currentUserRole !== 'ADMIN') {
+                alert("Apenas administradores podem limpar os logs.");
+                return;
+            }
+            if (confirm("Deseja limpar todos os logs de auditoria? Esta ação não pode ser desfeita.")) {
+                localStorage.setItem('library_audit_logs', '[]');
+                addAuditLog('LIMPEZA_LOGS', 'O administrador limpou os logs do sistema.');
+                renderAuditTable();
+            }
+        }
+
+        function sanitizeInput(str) {
+            if (typeof str !== 'string') return str;
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function checkLGPD() {
+            if (!localStorage.getItem('lgpd_consent')) {
+                document.getElementById('lgpd-banner').classList.remove('hidden');
+            }
+        }
+
+        function acceptLGPD() {
+            localStorage.setItem('lgpd_consent', 'true');
+            localStorage.setItem('lgpd_consent_date', new Date().toISOString());
+            document.getElementById('lgpd-banner').classList.add('hidden');
+            addAuditLog('LGPD_CONSENT', 'Usuário aceitou os termos de privacidade.');
+        }
+
+        function checkPermission(requiredRole) {
+            if (requiredRole === 'ADMIN' && currentUserRole !== 'ADMIN') return false;
+            if (requiredRole === 'OPERADOR' && (currentUserRole !== 'ADMIN' && currentUserRole !== 'OPERADOR')) return false;
+            return true;
+        }
+
+        function startSessionTimer() {
+            if (sessionTimeout) clearTimeout(sessionTimeout);
+            sessionTimeout = setTimeout(() => {
+                logoutAdmin(true);
+            }, SESSION_DURATION);
+            localStorage.setItem('session_start', Date.now());
+            localStorage.setItem('session_role', currentUserRole);
+        }
+
+        function restoreSession() {
+            const start = localStorage.getItem('session_start');
+            const role = localStorage.getItem('session_role');
+            if (start && role && (Date.now() - parseInt(start)) < SESSION_DURATION) {
+                currentUserRole = role;
+                isAdminAuthenticated = true;
+                // UI will be updated if user navigates to admin
+            }
+        }
+
         // IndexedDB for storing files
         function initDB() {
-            const request = indexedDB.open(DB_NAME, 1);
+            const request = indexedDB.open(DB_NAME, 3); // Version 3 for video store
             request.onupgradeneeded = (e) => {
                 db = e.target.result;
                 if (!db.objectStoreNames.contains(STORE_NAME)) {
                     db.createObjectStore(STORE_NAME);
+                }
+                if (!db.objectStoreNames.contains(STORE_NAME_MP3)) {
+                    db.createObjectStore(STORE_NAME_MP3);
+                }
+                if (!db.objectStoreNames.contains(STORE_NAME_VIDEOS)) {
+                    db.createObjectStore(STORE_NAME_VIDEOS);
                 }
             };
             request.onsuccess = (e) => {
@@ -1189,13 +1788,180 @@
                 ];
                 saveBooks();
             }
+            
+            const storedMp3 = localStorage.getItem('library_mp3');
+            if (storedMp3) {
+                mp3Files = JSON.parse(storedMp3);
+            }
+
+            const storedVideos = localStorage.getItem('library_videos');
+            if (storedVideos) {
+                videos = JSON.parse(storedVideos);
+            }
+
             renderHighlights();
             renderBooksGrid(books);
+            renderMp3Grid(mp3Files);
+            renderTurmas();
             updateStats();
+            populateTurmaSelects();
         }
 
         function saveBooks() {
             localStorage.setItem('library_books', JSON.stringify(books));
+        }
+
+        function saveMp3Files() {
+            localStorage.setItem('library_mp3', JSON.stringify(mp3Files));
+        }
+
+        function saveVideos() {
+            localStorage.setItem('library_videos', JSON.stringify(videos));
+        }
+
+        function populateTurmaSelects() {
+            const selects = document.querySelectorAll('.turma-select-input');
+            const options = selects[0].id === 'video-form-turma' ? '' : '<option value="">Nenhuma (Acervo Geral)</option>';
+            const turmaOptions = TURMAS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+            selects.forEach(s => {
+                const currentVal = s.value;
+                s.innerHTML = (s.id === 'video-form-turma' ? '' : '<option value="">Nenhuma (Acervo Geral)</option>') + turmaOptions;
+                s.value = currentVal;
+            });
+        }
+
+        function renderTurmas() {
+            const grid = document.getElementById('turmas-grid');
+            if (!grid) return;
+            grid.innerHTML = TURMAS.map(t => `
+                <div class="turma-card" onclick="viewTurma('${t.id}')">
+                    <div class="turma-avatar">${t.initial}</div>
+                    <div class="turma-name">${t.name}</div>
+                    <div class="turma-desc">${t.desc}</div>
+                </div>
+            `).join('');
+        }
+
+        function viewTurma(id) {
+            const turma = TURMAS.find(t => t.id === id);
+            if (!turma) return;
+
+            document.getElementById('turmas-selection-view').classList.add('hidden');
+            document.getElementById('turma-content-view').classList.remove('hidden');
+            document.getElementById('selected-turma-name').innerText = turma.name;
+            document.getElementById('selected-turma-desc').innerText = turma.desc;
+
+            renderTurmaContent(id);
+        }
+
+        function showTurmasSelection() {
+            document.getElementById('turmas-selection-view').classList.remove('hidden');
+            document.getElementById('turma-content-view').classList.add('hidden');
+        }
+
+        function renderTurmaContent(turmaId) {
+            const container = document.getElementById('modules-container');
+            
+            // Get all unique modules for this turma
+            const turmaBooks = books.filter(b => b.turma === turmaId);
+            const turmaMp3 = mp3Files.filter(a => a.turma === turmaId);
+            const turmaVideos = videos.filter(v => v.turma === turmaId);
+            
+            const allContent = [...turmaBooks, ...turmaMp3, ...turmaVideos];
+            const modules = [...new Set(allContent.map(item => item.modulo))].filter(m => m).sort();
+            
+            if (modules.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #777;">Nenhum conteúdo cadastrado para esta turma ainda.</p>';
+                return;
+            }
+
+            container.innerHTML = modules.map(m => {
+                const moduleBooks = turmaBooks.filter(b => b.modulo == m);
+                const moduleMp3 = turmaMp3.filter(a => a.modulo == m);
+                const moduleVideos = turmaVideos.filter(v => v.modulo == m);
+
+                return `
+                    <div class="module-block">
+                        <div class="module-header" onclick="toggleModule(this)">
+                            <span>${m.startsWith('Módulo') ? m : `Módulo ${m}`}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="module-content">
+                            ${moduleBooks.map(b => `
+                                <div class="content-item" onclick="viewBook('${b.id}')">
+                                    <div class="content-icon icon-pdf"><i class="fas fa-file-pdf"></i></div>
+                                    <div class="content-info">
+                                        <h4>${b.title}</h4>
+                                        <p>PDF • ${b.pages || 0} páginas</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${moduleMp3.map(a => `
+                                <div class="content-item" onclick="showSection('acervo-mp3')">
+                                    <div class="content-icon icon-mp3"><i class="fas fa-music"></i></div>
+                                    <div class="content-info">
+                                        <h4>${a.title}</h4>
+                                        <p>Áudio • ${a.artist}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${moduleVideos.map(v => `
+                                <div class="content-item" onclick="openVideoViewer('${v.id}')">
+                                    <div class="content-icon icon-video"><i class="fas fa-video"></i></div>
+                                    <div class="content-info">
+                                        <h4>${v.title}</h4>
+                                        <p>Vídeo • MP4</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleModule(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('i');
+            if (content.style.display === 'none') {
+                content.style.display = 'grid';
+                icon.className = 'fas fa-chevron-up';
+            } else {
+                content.style.display = 'none';
+                icon.className = 'fas fa-chevron-down';
+            }
+        }
+
+        // --- VIDEO PLAYER LOGIC ---
+        function openVideoViewer(id) {
+            const video = videos.find(v => v.id === id);
+            if (!video) return;
+
+            const tx = db.transaction(STORE_NAME_VIDEOS, 'readonly');
+            const store = tx.objectStore(STORE_NAME_VIDEOS);
+            const request = store.get(id);
+
+            request.onsuccess = () => {
+                const videoData = request.result;
+                if (!videoData) {
+                    alert("Arquivo de vídeo não encontrado.");
+                    return;
+                }
+
+                const blob = new Blob([videoData], { type: 'video/mp4' });
+                const url = URL.createObjectURL(blob);
+                const player = document.getElementById('video-player');
+                player.src = url;
+                document.getElementById('video-viewer').style.display = 'flex';
+                player.play();
+            };
+        }
+
+        function closeVideoViewer() {
+            const player = document.getElementById('video-player');
+            player.pause();
+            player.src = '';
+            document.getElementById('video-viewer').style.display = 'none';
         }
 
         // --- NAVIGATION ---
@@ -1215,9 +1981,10 @@
                 const links = document.querySelectorAll('.nav-link');
                 if (sectionId === 'home') links[0].classList.add('active');
                 if (sectionId === 'acervo') links[1].classList.add('active');
-                if (sectionId === 'categorias') links[2].classList.add('active');
-                if (sectionId === 'sobre') links[3].classList.add('active');
-                if (sectionId === 'admin') links[4].classList.add('active');
+                if (sectionId === 'acervo-mp3') links[2].classList.add('active');
+                if (sectionId === 'categorias') links[3].classList.add('active');
+                if (sectionId === 'sobre') links[4].classList.add('active');
+                if (sectionId === 'admin') links[5].classList.add('active');
             }
 
             window.scrollTo(0, 0);
@@ -1275,6 +2042,37 @@
             `;
         }
 
+        function renderMp3Grid(mp3List) {
+            const container = document.getElementById('mp3-grid');
+            if (!container) return;
+            container.innerHTML = mp3List.map(mp3 => createMp3Card(mp3)).join('');
+        }
+
+        function createMp3Card(mp3) {
+            return `
+                <div class="mp3-card">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div class="mp3-icon">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        <div class="mp3-info">
+                            <h3>${mp3.title}</h3>
+                            <p>${mp3.artist}${mp3.album ? ` • ${mp3.album}` : ''}</p>
+                        </div>
+                    </div>
+                    <div class="mp3-player-controls">
+                        <button class="btn-play" id="play-btn-${mp3.id}" onclick="togglePlayMp3('${mp3.id}')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div class="audio-progress" onclick="seekMp3(event, '${mp3.id}')">
+                            <div class="audio-progress-bar" id="progress-${mp3.id}"></div>
+                        </div>
+                    </div>
+                    ${mp3.description ? `<p style="font-size: 0.85rem; color: #666; margin-top: 5px;">${mp3.description}</p>` : ''}
+                </div>
+            `;
+        }
+
         function renderCategories() {
             const preview = document.getElementById('categories-preview');
             const full = document.getElementById('full-categories-grid');
@@ -1291,9 +2089,9 @@
         }
 
         function updateStats() {
-            document.getElementById('stat-books').innerText = books.length;
-            document.getElementById('stat-authors').innerText = new Set(books.map(b => b.author)).size;
-            document.getElementById('stat-categories').innerText = new Set(books.map(b => b.category)).size;
+            document.getElementById('stat-books').innerText = books.length + mp3Files.length + videos.length;
+            document.getElementById('stat-authors').innerText = new Set([...books.map(b => b.author), ...mp3Files.map(m => m.artist)]).size;
+            document.getElementById('stat-categories').innerText = new Set(books.map(b => b.category)).size + 2; // +1 for Audio, +1 for Formação
         }
 
         // --- COVER GENERATION ---
@@ -1393,6 +2191,92 @@
             document.getElementById('filter-category').value = catName;
             showSection('acervo');
             filterBooks();
+        }
+
+        function filterMp3() {
+            const query = document.getElementById('search-mp3-input').value.toLowerCase();
+            let filtered = mp3Files.filter(mp3 => {
+                return mp3.title.toLowerCase().includes(query) || 
+                       mp3.artist.toLowerCase().includes(query) || 
+                       (mp3.album && mp3.album.toLowerCase().includes(query));
+            });
+            renderMp3Grid(filtered);
+            
+            const noRes = document.getElementById('no-mp3-results');
+            if (filtered.length === 0) noRes.classList.remove('hidden');
+            else noRes.classList.add('hidden');
+        }
+
+        // --- MP3 PLAYER LOGIC ---
+        let currentAudio = null;
+        let currentMp3Id = null;
+
+        async function togglePlayMp3(id) {
+            const btn = document.getElementById(`play-btn-${id}`);
+            const icon = btn.querySelector('i');
+
+            if (currentMp3Id === id && currentAudio) {
+                if (currentAudio.paused) {
+                    currentAudio.play();
+                    icon.className = 'fas fa-pause';
+                } else {
+                    currentAudio.pause();
+                    icon.className = 'fas fa-play';
+                }
+                return;
+            }
+
+            // Stop current audio if any
+            if (currentAudio) {
+                currentAudio.pause();
+                const oldBtn = document.getElementById(`play-btn-${currentMp3Id}`);
+                if (oldBtn) oldBtn.querySelector('i').className = 'fas fa-play';
+                const oldProgress = document.getElementById(`progress-${currentMp3Id}`);
+                if (oldProgress) oldProgress.style.width = '0%';
+            }
+
+            // Load new audio from IndexedDB
+            const tx = db.transaction(STORE_NAME_MP3, 'readonly');
+            const store = tx.objectStore(STORE_NAME_MP3);
+            const request = store.get(id);
+
+            request.onsuccess = () => {
+                const audioData = request.result;
+                if (!audioData) {
+                    alert("Arquivo de áudio não encontrado.");
+                    return;
+                }
+
+                const blob = new Blob([audioData], { type: 'audio/mpeg' });
+                const url = URL.createObjectURL(blob);
+                
+                currentAudio = new Audio(url);
+                currentMp3Id = id;
+                
+                currentAudio.play();
+                icon.className = 'fas fa-pause';
+
+                currentAudio.ontimeupdate = () => {
+                    const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
+                    const progressBar = document.getElementById(`progress-${id}`);
+                    if (progressBar) progressBar.style.width = `${progress}%`;
+                };
+
+                currentAudio.onended = () => {
+                    icon.className = 'fas fa-play';
+                    const progressBar = document.getElementById(`progress-${id}`);
+                    if (progressBar) progressBar.style.width = '0%';
+                };
+            };
+        }
+
+        function seekMp3(e, id) {
+            if (currentMp3Id !== id || !currentAudio) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const width = rect.width;
+            const percentage = x / width;
+            currentAudio.currentTime = percentage * currentAudio.duration;
         }
 
         // --- BOOK VIEW ---
@@ -1655,50 +2539,90 @@
             const user = document.getElementById('admin-user').value;
             const pass = document.getElementById('admin-pass').value;
             
+            let authenticated = false;
+            let role = 'CONSULTA';
+
             if (user === ADMIN_USER && pass === ADMIN_PASS) {
+                authenticated = true;
+                role = 'ADMIN';
+            } else if (user === 'operador' && pass === OPERATOR_PASS) {
+                authenticated = true;
+                role = 'OPERADOR';
+            }
+
+            if (authenticated) {
                 isAdminAuthenticated = true;
+                currentUserRole = role;
                 document.getElementById('admin-login-view').classList.add('hidden');
                 document.getElementById('admin-dashboard-view').classList.remove('hidden');
                 updateAdminDashboard();
-                checkDriveConfig(); // Initialize Drive config check on login
+                checkDriveConfig();
+                startSessionTimer();
+                addAuditLog('LOGIN', `Login realizado com sucesso como ${role}.`);
+                
+                // Reset form
+                document.getElementById('admin-user').value = '';
+                document.getElementById('admin-pass').value = '';
+                document.getElementById('login-error').classList.add('hidden');
             } else {
                 document.getElementById('login-error').classList.remove('hidden');
+                addAuditLog('LOGIN_FALHA', `Tentativa de login falha para o usuário: ${user}`);
             }
         }
 
-        function logoutAdmin() {
+        function logoutAdmin(isAuto = false) {
+            addAuditLog('LOGOUT', isAuto ? 'Sessão expirada automaticamente.' : 'Logout realizado pelo usuário.');
             isAdminAuthenticated = false;
+            currentUserRole = 'CONSULTA';
+            if (sessionTimeout) clearTimeout(sessionTimeout);
+            localStorage.removeItem('session_start');
+            localStorage.removeItem('session_role');
+            
             document.getElementById('admin-login-view').classList.remove('hidden');
             document.getElementById('admin-dashboard-view').classList.add('hidden');
+            if (isAuto) alert("Sua sessão expirou por segurança. Por favor, faça login novamente.");
         }
 
         function showAdminTab(tab) {
+            // Check permissions for specific tabs
+            if ((tab === 'audit' || tab === 'drive') && currentUserRole !== 'ADMIN') {
+                alert("Acesso negado. Esta funcionalidade é exclusiva para administradores.");
+                return;
+            }
+
             document.getElementById('tab-dash').classList.add('hidden');
             document.getElementById('tab-upload').classList.add('hidden');
+            document.getElementById('tab-upload-mp3').classList.add('hidden');
+            document.getElementById('tab-upload-video').classList.add('hidden');
             document.getElementById('tab-drive').classList.add('hidden');
             document.getElementById('tab-manage').classList.add('hidden');
+            document.getElementById('tab-audit').classList.add('hidden');
             
             document.querySelectorAll('.admin-nav li').forEach(li => li.classList.remove('active'));
             
-            if (tab === 'dash') {
-                document.getElementById('tab-dash').classList.remove('hidden');
-                document.querySelector('.admin-nav li:nth-child(1)').classList.add('active');
-            } else if (tab === 'upload') {
-                document.getElementById('tab-upload').classList.remove('hidden');
-                document.querySelector('.admin-nav li:nth-child(2)').classList.add('active');
-            } else if (tab === 'drive') {
-                document.getElementById('tab-drive').classList.remove('hidden');
-                document.querySelector('.admin-nav li:nth-child(3)').classList.add('active');
-            } else if (tab === 'manage') {
-                document.getElementById('tab-manage').classList.remove('hidden');
-                document.querySelector('.admin-nav li:nth-child(4)').classList.add('active');
-                renderAdminTable();
+            const tabMap = {
+                'dash': { el: 'tab-dash', nav: 1 },
+                'upload': { el: 'tab-upload', nav: 2 },
+                'upload-mp3': { el: 'tab-upload-mp3', nav: 3 },
+                'upload-video': { el: 'tab-upload-video', nav: 4 },
+                'drive': { el: 'tab-drive', nav: 5 },
+                'manage': { el: 'tab-manage', nav: 6 },
+                'audit': { el: 'tab-audit', nav: 7 }
+            };
+
+            const target = tabMap[tab];
+            if (target) {
+                document.getElementById(target.el).classList.remove('hidden');
+                document.querySelector(`.admin-nav li:nth-child(${target.nav})`).classList.add('active');
+                if (tab === 'manage') renderAdminTable();
+                if (tab === 'audit') renderAuditTable();
             }
         }
 
         function updateAdminDashboard() {
             document.getElementById('dash-total-books').innerText = books.length;
-            document.getElementById('dash-total-cats').innerText = new Set(books.map(b => b.category)).size;
+            document.getElementById('dash-total-mp3').innerText = mp3Files.length;
+            document.getElementById('dash-total-cats').innerText = videos.length; // Using this for Total Videos in dashboard
         }
 
         function renderAdminTable() {
@@ -1720,16 +2644,157 @@
         // Upload Logic
         const dropArea = document.getElementById('drop-area');
         const fileInput = document.getElementById('file-input');
+        const dropAreaMp3 = document.getElementById('drop-area-mp3');
+        const mp3FileInput = document.getElementById('mp3-file-input');
+        const dropAreaVideo = document.getElementById('drop-area-video');
+        const videoFileInput = document.getElementById('video-file-input');
 
         dropArea.onclick = () => fileInput.click();
+        dropAreaMp3.onclick = () => mp3FileInput.click();
+        dropAreaVideo.onclick = () => videoFileInput.click();
         
         fileInput.onchange = (e) => handleFile(e.target.files[0]);
+        mp3FileInput.onchange = (e) => handleMp3File(e.target.files[0]);
+        videoFileInput.onchange = (e) => handleVideoFile(e.target.files[0]);
         
         dropArea.ondragover = (e) => { e.preventDefault(); dropArea.style.background = 'rgba(212, 175, 55, 0.2)'; };
         dropArea.ondragleave = () => { dropArea.style.background = 'transparent'; };
         dropArea.ondrop = (e) => {
             e.preventDefault();
             handleFile(e.dataTransfer.files[0]);
+        };
+
+        dropAreaMp3.ondragover = (e) => { e.preventDefault(); dropAreaMp3.style.background = 'rgba(212, 175, 55, 0.2)'; };
+        dropAreaMp3.ondragleave = () => { dropAreaMp3.style.background = 'transparent'; };
+        dropAreaMp3.ondrop = (e) => {
+            e.preventDefault();
+            handleMp3File(e.dataTransfer.files[0]);
+        };
+
+        dropAreaVideo.ondragover = (e) => { e.preventDefault(); dropAreaVideo.style.background = 'rgba(212, 175, 55, 0.2)'; };
+        dropAreaVideo.ondragleave = () => { dropAreaVideo.style.background = 'transparent'; };
+        dropAreaVideo.ondrop = (e) => {
+            e.preventDefault();
+            handleVideoFile(e.dataTransfer.files[0]);
+        };
+
+        async function handleVideoFile(file) {
+            if (!file || file.type !== 'video/mp4') {
+                alert("Por favor, selecione um arquivo MP4.");
+                return;
+            }
+
+            dropAreaVideo.innerHTML = `<i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i><p>Analisando arquivo...</p>`;
+
+            const name = file.name.replace('.mp4', '');
+            document.getElementById('video-form-title').value = name;
+
+            window.currentUploadVideoFile = file;
+            dropAreaVideo.innerHTML = `<i class="fas fa-check-circle" style="color: green; font-size: 3rem;"></i><p>${file.name} pronto para salvar!</p>`;
+        }
+
+        document.getElementById('video-form').onsubmit = async (e) => {
+            e.preventDefault();
+            if (!window.currentUploadVideoFile) {
+                alert("Por favor, selecione um arquivo de vídeo primeiro.");
+                return;
+            }
+
+            const id = Date.now().toString();
+            const newVideo = {
+                id,
+                title: document.getElementById('video-form-title').value,
+                turma: document.getElementById('video-form-turma').value,
+                modulo: document.getElementById('video-form-modulo').value,
+                year: parseInt(document.getElementById('video-form-year').value) || new Date().getFullYear(),
+                description: document.getElementById('video-form-description').value,
+                dateAdded: Date.now()
+            };
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const tx = db.transaction(STORE_NAME_VIDEOS, 'readwrite');
+                const store = tx.objectStore(STORE_NAME_VIDEOS);
+                store.put(e.target.result, id);
+            };
+            reader.readAsArrayBuffer(window.currentUploadVideoFile);
+
+            videos.push(newVideo);
+            saveVideos();
+            updateStats();
+            
+            addAuditLog('ADICIONAR_VIDEO', `Vídeo "${newVideo.title}" adicionado.`);
+            alert("Vídeo salvo com sucesso!");
+            e.target.reset();
+            window.currentUploadVideoFile = null;
+            dropAreaVideo.innerHTML = `<i class="fas fa-video" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i><p>Arraste o arquivo MP4 aqui ou clique para selecionar</p>`;
+            showSection('formacao');
+        };
+
+        async function handleMp3File(file) {
+            if (!file || file.type !== 'audio/mpeg') {
+                alert("Por favor, selecione um arquivo MP3.");
+                return;
+            }
+
+            dropAreaMp3.innerHTML = `<i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i><p>Analisando arquivo...</p>`;
+
+            const name = file.name.replace('.mp3', '');
+            let title = name, artist = 'Desconhecido';
+
+            if (name.includes(' - ')) {
+                const parts = name.split(' - ');
+                artist = parts[0];
+                title = parts[1];
+            }
+
+            document.getElementById('mp3-form-title').value = title;
+            document.getElementById('mp3-form-artist').value = artist;
+
+            window.currentUploadMp3File = file;
+            dropAreaMp3.innerHTML = `<i class="fas fa-check-circle" style="color: green; font-size: 3rem;"></i><p>${file.name} pronto para salvar!</p>`;
+        }
+
+        document.getElementById('mp3-form').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            if (!window.currentUploadMp3File) {
+                alert("Por favor, selecione um arquivo MP3 primeiro.");
+                return;
+            }
+
+            const id = Date.now().toString();
+            const newMp3 = {
+                id,
+                title: document.getElementById('mp3-form-title').value,
+                artist: document.getElementById('mp3-form-artist').value,
+                album: document.getElementById('mp3-form-album').value,
+                year: parseInt(document.getElementById('mp3-form-year').value) || new Date().getFullYear(),
+                turma: document.getElementById('mp3-form-turma').value,
+                modulo: document.getElementById('mp3-form-modulo').value,
+                description: document.getElementById('mp3-form-description').value,
+                dateAdded: Date.now()
+            };
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const tx = db.transaction(STORE_NAME_MP3, 'readwrite');
+                const store = tx.objectStore(STORE_NAME_MP3);
+                store.put(e.target.result, id);
+            };
+            reader.readAsArrayBuffer(window.currentUploadMp3File);
+
+            mp3Files.push(newMp3);
+            saveMp3Files();
+            renderMp3Grid(mp3Files);
+            updateStats();
+            
+            addAuditLog('ADICIONAR_MP3', `Áudio "${newMp3.title}" adicionado.`);
+            alert("MP3 salvo com sucesso!");
+            e.target.reset();
+            window.currentUploadMp3File = null;
+            dropAreaMp3.innerHTML = `<i class="fas fa-music" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i><p>Arraste o arquivo MP3 aqui ou clique para selecionar</p>`;
+            showSection('acervo-mp3');
         };
 
         async function handleFile(file) {
@@ -1843,6 +2908,8 @@
                 title: document.getElementById('form-title').value,
                 author: document.getElementById('form-author').value,
                 category: document.getElementById('form-category').value,
+                turma: document.getElementById('form-turma').value,
+                modulo: document.getElementById('form-modulo').value,
                 year: parseInt(document.getElementById('form-year').value) || 2024,
                 publisher: document.getElementById('form-publisher').value,
                 isbn: document.getElementById('form-isbn').value,
@@ -1872,6 +2939,7 @@
             saveBooks();
             loadBooks(); // Reload UI
             
+            addAuditLog('ADICIONAR_LIVRO', `Livro "${newBook.title}" adicionado ao acervo.`);
             alert("Livro salvo com sucesso!");
             e.target.reset();
             window.currentUploadFile = null;
@@ -1880,7 +2948,8 @@
         };
 
         function deleteBook(id) {
-            if (confirm("Tem certeza que deseja excluir este livro?")) {
+            const book = books.find(b => b.id === id);
+            if (confirm(`Tem certeza que deseja excluir o livro "${book.title}"?`)) {
                 books = books.filter(b => b.id !== id);
                 saveBooks();
                 
@@ -1888,6 +2957,7 @@
                 const store = tx.objectStore(STORE_NAME);
                 store.delete(id);
                 
+                addAuditLog('EXCLUIR_LIVRO', `Livro "${book.title}" excluído do acervo.`);
                 renderAdminTable();
                 updateStats();
             }
