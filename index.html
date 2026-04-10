@@ -630,6 +630,97 @@
         .btn-edit { background-color: #3498db; color: #fff; }
         .btn-delete { background-color: #e74c3c; color: #fff; }
 
+        .admin-manage-tabs {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .admin-manage-tabs .btn {
+            border-radius: 999px;
+        }
+
+        .admin-manage-tabs .active {
+            background-color: var(--primary);
+            color: var(--secondary);
+        }
+
+        .admin-manage-view {
+            margin-top: 20px;
+        }
+
+        .admin-manage-content {
+            display: block;
+        }
+
+        .admin-manage-details {
+            background: var(--bg);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .admin-manage-details summary {
+            cursor: pointer;
+            padding: 14px 16px;
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(0,0,0,0.04);
+        }
+
+        .admin-manage-items {
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .admin-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            background: var(--card-bg);
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .admin-item-title {
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .admin-item-meta {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 4px;
+        }
+
+        .admin-edit-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            padding: 20px;
+        }
+
+        .admin-edit-dialog {
+            width: min(820px, 100%);
+            max-height: 90vh;
+            overflow: auto;
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+        }
+
         /* --- MP3 GRID & PLAYER --- */
         .mp3-grid {
             display: grid;
@@ -1392,22 +1483,12 @@
                             <!-- Manage Tab -->
                             <div id="tab-manage" class="hidden">
                                 <h3>Gerenciar Acervo</h3>
-                                <div class="admin-table-container">
-                                    <table id="admin-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Título</th>
-                                                <th>Autor</th>
-                                                <th>Categoria</th>
-                                                <th>Ano</th>
-                                                <th>Ações</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <!-- Dynamic Table Content -->
-                                        </tbody>
-                                    </table>
+                                <div class="admin-manage-tabs">
+                                    <button id="admin-manage-tab-pdf" class="btn btn-edit" onclick="setAdminManageView('pdf')">PDF</button>
+                                    <button id="admin-manage-tab-mp3" class="btn btn-edit" onclick="setAdminManageView('mp3')">Mp3</button>
                                 </div>
+                                <div id="admin-manage-pdf" class="admin-manage-view"></div>
+                                <div id="admin-manage-mp3" class="admin-manage-view hidden"></div>
                             </div>
 
                             <!-- Audit Tab -->
@@ -1446,6 +1527,16 @@
         </div>
         <div class="lgpd-actions">
             <button class="btn btn-primary btn-sm" onclick="acceptLGPD()">Aceitar</button>
+        </div>
+    </div>
+
+    <div id="admin-edit-modal" class="admin-edit-modal hidden">
+        <div class="admin-edit-dialog">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <h3 id="admin-edit-modal-title" style="margin: 0;">Editar</h3>
+                <button class="btn btn-sm btn-delete" onclick="closeAdminEditModal()">Fechar</button>
+            </div>
+            <div id="admin-edit-modal-body" style="margin-top: 15px;"></div>
         </div>
     </div>
 
@@ -1551,6 +1642,12 @@
             return inserted[0].id;
         }
 
+        async function fbUpdate(tableName, docId, patch) {
+            const { data: updated, error } = await getSB().from(tableName).update(patch).eq('id', docId).select();
+            if (error) throw { code: error.code || 'error', message: error.message };
+            return updated && updated[0] ? updated[0] : null;
+        }
+
         async function fbDelete(tableName, docId) {
             const { error } = await getSB().from(tableName).delete().eq('id', docId);
             if (error) throw { code: error.code || 'error', message: error.message };
@@ -1560,7 +1657,7 @@
         let books = [];
         let mp3Files = [];
         let videos = [];
-        const ADMIN_EMAIL = 'jairo.coelho73@gmail.com';
+        const ADMIN_EMAIL = 'admin@cfec.com';
         let isAdminAuthenticated = false;
         let currentUserRole = 'CONSULTA';
         let sessionTimeout = null;
@@ -1592,11 +1689,11 @@
         ];
 
         // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             checkStorageHealth();
             checkLGPD();
-            restoreSession();
-            loadAllData();
+            await initAuth();
+            await loadAllData();
         });
 
         // --- SECURITY & AUDIT LOGS ---
@@ -1665,22 +1762,45 @@
             return true;
         }
 
+        function requireAdmin() {
+            if (isAdminAuthenticated && currentUserRole === 'ADMIN') return true;
+            alert("Acesso negado. Faça login como administrador.");
+            return false;
+        }
+
+        function setAuthStateFromSession(session) {
+            const email = session && session.user && session.user.email ? String(session.user.email).toLowerCase() : '';
+            if (session && email === String(ADMIN_EMAIL).toLowerCase()) {
+                isAdminAuthenticated = true;
+                currentUserRole = 'ADMIN';
+                startSessionTimer();
+            } else {
+                isAdminAuthenticated = false;
+                currentUserRole = 'CONSULTA';
+                if (sessionTimeout) clearTimeout(sessionTimeout);
+            }
+        }
+
+        async function initAuth() {
+            try {
+                const { data } = await getSB().auth.getSession();
+                setAuthStateFromSession(data ? data.session : null);
+            } catch (e) {
+                setAuthStateFromSession(null);
+            }
+
+            try {
+                getSB().auth.onAuthStateChange((_event, session) => {
+                    setAuthStateFromSession(session);
+                });
+            } catch (e) {}
+        }
+
         function startSessionTimer() {
             if (sessionTimeout) clearTimeout(sessionTimeout);
             sessionTimeout = setTimeout(() => {
                 logoutAdmin(true);
             }, SESSION_DURATION);
-            safeStorageSet('session_start', Date.now().toString());
-            safeStorageSet('session_role', currentUserRole);
-        }
-
-        function restoreSession() {
-            const start = safeStorageGet('session_start');
-            const role = safeStorageGet('session_role');
-            if (start && role && (Date.now() - parseInt(start, 10)) < SESSION_DURATION) {
-                currentUserRole = role;
-                isAdminAuthenticated = true;
-            }
         }
 
         function formatExternalUrl(url) {
@@ -1806,6 +1926,9 @@
                 console.warn('Erro ao carregar books:', err.code);
                 books = [];
             }
+            if (!isAdminAuthenticated || currentUserRole !== 'ADMIN') {
+                books = books.filter(b => b && b.public === true);
+            }
 
             try {
                 mp3Files = await fbGetAll('mp3files');
@@ -1896,37 +2019,38 @@
                 const moduleBooks = turmaBooks.filter(b => getModulo(b) == m);
                 const moduleMp3 = turmaMp3.filter(a => getModulo(a) == m);
                 const moduleVideos = turmaVideos.filter(v => getModulo(v) == m);
+                const moduleLabel = m.startsWith('Módulo') ? m : `Módulo ${m}`;
 
                 return `
                     <div class="module-block">
                         <div class="module-header" onclick="toggleModule(this)">
-                            <span>${m.startsWith('Módulo') ? m : `Módulo ${m}`}</span>
+                            <span>${sanitizeInput(String(moduleLabel))}</span>
                             <i class="fas fa-chevron-down"></i>
                         </div>
                         <div class="module-content">
                             ${moduleBooks.map(b => `
-                                <div class="content-item" onclick="viewBook('${b.id}')">
+                                <div class="content-item" onclick="viewBook(${JSON.stringify(String(b.id || ''))})">
                                     <div class="content-icon icon-pdf"><i class="fas fa-file-pdf"></i></div>
                                     <div class="content-info">
-                                        <h4>${b.title}</h4>
+                                        <h4>${sanitizeInput(String(b.title || ''))}</h4>
                                         <p>PDF • ${b.pages || 0} páginas</p>
                                     </div>
                                 </div>
                             `).join('')}
                             ${moduleMp3.map(a => `
-                                <div class="content-item" onclick="openMp3Details('${a.id}')">
+                                <div class="content-item" onclick="openMp3Details(${JSON.stringify(String(a.id || ''))})">
                                     <div class="content-icon icon-mp3"><i class="fas fa-music"></i></div>
                                     <div class="content-info">
-                                        <h4>${a.title}</h4>
-                                        <p>Áudio • ${a.artist}</p>
+                                        <h4>${sanitizeInput(String(a.title || ''))}</h4>
+                                        <p>Áudio • ${sanitizeInput(String(a.artist || ''))}</p>
                                     </div>
                                 </div>
                             `).join('')}
                             ${moduleVideos.map(v => `
-                                <div class="content-item" onclick="openVideoViewer('${v.id}')">
+                                <div class="content-item" onclick="openVideoViewer(${JSON.stringify(String(v.id || ''))})">
                                     <div class="content-icon icon-video"><i class="fas fa-video"></i></div>
                                     <div class="content-info">
-                                        <h4>${v.title}</h4>
+                                        <h4>${sanitizeInput(String(v.title || ''))}</h4>
                                         <p>Vídeo • MP4</p>
                                     </div>
                                 </div>
@@ -1940,8 +2064,9 @@
         function toggleModule(header) {
             const content = header.nextElementSibling;
             const icon = header.querySelector('i');
+            const openDisplay = content && content.classList && content.classList.contains('admin-manage-content') ? 'block' : 'grid';
             if (content.style.display === 'none') {
-                content.style.display = 'grid';
+                content.style.display = openDisplay;
                 icon.className = 'fas fa-chevron-up';
             } else {
                 content.style.display = 'none';
@@ -2025,15 +2150,19 @@
         }
 
         function createBookCard(book) {
+            const safeId = JSON.stringify(String(book.id || ''));
+            const safeCategory = sanitizeInput(String(book.category || ''));
+            const safeTitle = sanitizeInput(String(book.title || ''));
+            const safeAuthor = sanitizeInput(String(book.author || ''));
             return `
-                <div class="book-card" onclick="viewBook('${book.id}')">
+                <div class="book-card" onclick="viewBook(${safeId})">
                     <div class="book-cover-container">
                         <canvas class="book-cover-canvas" id="canvas-${book.id}" width="200" height="300"></canvas>
                     </div>
                     <div class="book-info">
-                        <div class="book-category">${book.category}</div>
-                        <div class="book-title">${book.title}</div>
-                        <div class="book-author">${book.author}</div>
+                        <div class="book-category">${safeCategory}</div>
+                        <div class="book-title">${safeTitle}</div>
+                        <div class="book-author">${safeAuthor}</div>
                     </div>
                 </div>
             `;
@@ -2046,6 +2175,11 @@
         }
 
         function createMp3Card(mp3) {
+            const safeId = JSON.stringify(String(mp3.id || ''));
+            const safeTitle = sanitizeInput(String(mp3.title || ''));
+            const safeArtist = sanitizeInput(String(mp3.artist || ''));
+            const safeAlbum = mp3.album ? sanitizeInput(String(mp3.album)) : '';
+            const safeDescription = mp3.description ? sanitizeInput(String(mp3.description)) : '';
             return `
                 <div class="mp3-card" id="mp3-card-${mp3.id}">
                     <div style="display: flex; align-items: center; gap: 20px;">
@@ -2053,19 +2187,19 @@
                             <i class="fas fa-music"></i>
                         </div>
                         <div class="mp3-info">
-                            <h3>${mp3.title}</h3>
-                            <p>${mp3.artist}${mp3.album ? ` • ${mp3.album}` : ''}</p>
+                            <h3>${safeTitle}</h3>
+                            <p>${safeArtist}${safeAlbum ? ` • ${safeAlbum}` : ''}</p>
                         </div>
                     </div>
                     <div class="mp3-player-controls">
-                        <button class="btn-play" id="play-btn-${mp3.id}" onclick="togglePlayMp3('${mp3.id}')">
+                        <button class="btn-play" id="play-btn-${mp3.id}" onclick="togglePlayMp3(${safeId})">
                             <i class="fas fa-play"></i>
                         </button>
-                        <div class="audio-progress" onclick="seekMp3(event, '${mp3.id}')">
+                        <div class="audio-progress" onclick="seekMp3(event, ${safeId})">
                             <div class="audio-progress-bar" id="progress-${mp3.id}"></div>
                         </div>
                     </div>
-                    ${mp3.description ? `<p style="font-size: 0.85rem; color: #666; margin-top: 5px;">${mp3.description}</p>` : ''}
+                    ${safeDescription ? `<p style="font-size: 0.85rem; color: #666; margin-top: 5px;">${safeDescription}</p>` : ''}
                 </div>
             `;
         }
@@ -2112,28 +2246,34 @@
 
             const driveId = mp3Item.url ? getDriveFileId(mp3Item.url) : null;
             const coverSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000` : getDefaultMp3CoverDataUrl(mp3Item.title);
+            const safeId = JSON.stringify(String(id || ''));
+            const safeTitle = sanitizeInput(String(mp3Item.title || ''));
+            const safeArtist = sanitizeInput(String(mp3Item.artist || ''));
+            const safeTurma = sanitizeInput(String(mp3Item.turma || '-'));
+            const safeModulo = sanitizeInput(String(mp3Item.modulo || '-'));
+            const safeAno = sanitizeInput(String(mp3Item.ano || mp3Item.year || '-'));
             const content = document.getElementById('mp3-details-content');
             content.innerHTML = `
                 <div class="book-details">
                     <img class="details-cover" src="${coverSrc}" alt="Capa do áudio">
                     <div class="details-info">
                         <div class="details-category">ÁUDIO</div>
-                        <h1>${mp3Item.title}</h1>
-                        <p class="details-author">Por ${mp3Item.artist}</p>
+                        <h1>${safeTitle}</h1>
+                        <p class="details-author">Por ${safeArtist}</p>
                         <div class="details-meta">
-                            <div class="meta-item"><span class="meta-label">Turma:</span><span>${mp3Item.turma || '-'}</span></div>
-                            <div class="meta-item"><span class="meta-label">Módulo:</span><span>${mp3Item.modulo || '-'}</span></div>
-                            <div class="meta-item"><span class="meta-label">Ano:</span><span>${mp3Item.ano || mp3Item.year || '-'}</span></div>
+                            <div class="meta-item"><span class="meta-label">Turma:</span><span>${safeTurma}</span></div>
+                            <div class="meta-item"><span class="meta-label">Módulo:</span><span>${safeModulo}</span></div>
+                            <div class="meta-item"><span class="meta-label">Ano:</span><span>${safeAno}</span></div>
                         </div>
                         <div class="details-actions">
-                            <button class="btn btn-read" onclick="playMp3Details('${id}')"><i class="fas fa-play"></i> Ouvir</button>
-                            <button class="btn btn-download" onclick="downloadMp3('${id}')"><i class="fas fa-download"></i> Download MP3</button>
+                            <button class="btn btn-read" onclick="playMp3Details(${safeId})"><i class="fas fa-play"></i> Ouvir</button>
+                            <button class="btn btn-download" onclick="downloadMp3(${safeId})"><i class="fas fa-download"></i> Download MP3</button>
                         </div>
                         <div id="mp3-details-player" style="margin-top: 10px;">
                             <audio id="mp3-details-audio" controls style="width: 100%; display: none;"></audio>
                             <iframe id="mp3-details-iframe" style="width: 100%; height: 120px; border: 0; display: none;" allow="autoplay"></iframe>
                         </div>
-                        ${mp3Item.description ? `<div class="details-description"><h3>Descrição</h3><p>${sanitizeInput(mp3Item.description)}</p></div>` : ''}
+                        ${mp3Item.description ? `<div class="details-description"><h3>Descrição</h3><p>${sanitizeInput(String(mp3Item.description))}</p></div>` : ''}
                     </div>
                 </div>
             `;
@@ -2420,31 +2560,41 @@
             book.views = (book.views || 0) + 1;
             
             const details = document.getElementById('book-details-content');
-            const tags = (book.tags || '').toString().split(',').map(t => t.trim()).filter(Boolean);
+            const safeId = JSON.stringify(String(book.id || ''));
+            const safeCategory = sanitizeInput(String(book.category || ''));
+            const safeTitle = sanitizeInput(String(book.title || ''));
+            const safeAuthor = sanitizeInput(String(book.author || ''));
+            const safePublisher = sanitizeInput(String(book.publisher || '-'));
+            const safeIsbn = sanitizeInput(String(book.isbn || '-'));
+            const safeLanguage = sanitizeInput(String(book.language || '-'));
+            const safeYear = sanitizeInput(String(book.year || '-'));
+            const safePages = sanitizeInput(String(book.pages || '-'));
+            const safeDescription = sanitizeInput(String(book.description || 'Nenhuma descrição disponível.'));
+            const tags = (book.tags || '').toString().split(',').map(t => t.trim()).filter(Boolean).map(t => sanitizeInput(t));
             details.innerHTML = `
                 <div class="book-details">
                     <div class="details-cover-container">
                         <canvas id="details-canvas" width="350" height="500" class="details-cover"></canvas>
                     </div>
                     <div class="details-info">
-                        <div class="book-category">${book.category}</div>
-                        <h1>${book.title}</h1>
-                        <p style="font-size: 1.5rem; margin-bottom: 20px;">Por <strong>${book.author}</strong></p>
+                        <div class="book-category">${safeCategory}</div>
+                        <h1>${safeTitle}</h1>
+                        <p style="font-size: 1.5rem; margin-bottom: 20px;">Por <strong>${safeAuthor}</strong></p>
                         
                         <div class="details-meta">
-                            <div class="meta-item"><span class="meta-label">Ano:</span> ${book.year}</div>
-                            <div class="meta-item"><span class="meta-label">Editora:</span> ${book.publisher || '-'}</div>
-                            <div class="meta-item"><span class="meta-label">ISBN:</span> ${book.isbn || '-'}</div>
-                            <div class="meta-item"><span class="meta-label">Páginas:</span> ${book.pages || '-'}</div>
-                            <div class="meta-item"><span class="meta-label">Idioma:</span> ${book.language || '-'}</div>
+                            <div class="meta-item"><span class="meta-label">Ano:</span> ${safeYear}</div>
+                            <div class="meta-item"><span class="meta-label">Editora:</span> ${safePublisher}</div>
+                            <div class="meta-item"><span class="meta-label">ISBN:</span> ${safeIsbn}</div>
+                            <div class="meta-item"><span class="meta-label">Páginas:</span> ${safePages}</div>
+                            <div class="meta-item"><span class="meta-label">Idioma:</span> ${safeLanguage}</div>
                         </div>
 
                         <div class="details-actions">
-                            <button class="btn btn-read" onclick="openViewer('${book.id}')">
+                            <button class="btn btn-read" onclick="openViewer(${safeId})">
                                 <i class="fas fa-book-open"></i> Ler Online
                             </button>
                             ${book.download ? `
-                                <button class="btn btn-download" onclick="downloadBook('${book.id}')">
+                                <button class="btn btn-download" onclick="downloadBook(${safeId})">
                                     <i class="fas fa-download"></i> Download PDF
                                 </button>
                             ` : ''}
@@ -2452,9 +2602,9 @@
 
                         <div class="details-description">
                             <h3>Sinopse</h3>
-                            <p>${book.description || 'Nenhuma descrição disponível.'}</p>
+                            <p>${safeDescription}</p>
                             <div style="margin-top: 20px;">
-                                ${tags.map(tag => `<span style="background: var(--secondary); color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; margin-right: 8px;">#${tag.trim()}</span>`).join('')}
+                                ${tags.map(tag => `<span style="background: var(--secondary); color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; margin-right: 8px;">#${tag}</span>`).join('')}
                             </div>
                         </div>
                     </div>
@@ -2701,12 +2851,11 @@
                     setLoginError('E-mail não autorizado para administrador.');
                     return;
                 }
-                isAdminAuthenticated = true;
-                currentUserRole = 'ADMIN';
+                setAuthStateFromSession(data.session);
                 document.getElementById('admin-login-view').classList.add('hidden');
                 document.getElementById('admin-dashboard-view').classList.remove('hidden');
+                await loadAllData();
                 updateAdminDashboard();
-                startSessionTimer();
                 addAuditLog('LOGIN', 'Login realizado com sucesso como ADMIN.');
                 document.getElementById('admin-user').value = '';
                 document.getElementById('admin-pass').value = '';
@@ -2726,11 +2875,10 @@
             isAdminAuthenticated = false;
             currentUserRole = 'CONSULTA';
             if (sessionTimeout) clearTimeout(sessionTimeout);
-            safeStorageRemove('session_start');
-            safeStorageRemove('session_role');
             try { await getSB().auth.signOut(); } catch(e) {}
             document.getElementById('admin-login-view').classList.remove('hidden');
             document.getElementById('admin-dashboard-view').classList.add('hidden');
+            await loadAllData();
             if (isAuto) alert("Sua sessão expirou por segurança. Por favor, faça login novamente.");
         }
 
@@ -2761,7 +2909,7 @@
             if (target) {
                 document.getElementById(target.el).classList.remove('hidden');
                 document.querySelector(`.admin-nav li:nth-child(${target.nav})`).classList.add('active');
-                if (tab === 'manage') renderAdminTable();
+                if (tab === 'manage') setAdminManageView('pdf');
                 if (tab === 'audit') renderAuditTable();
             }
         }
@@ -2775,30 +2923,150 @@
             if (dashVideos) dashVideos.innerText = videos.length;
         }
 
-        function renderAdminTable() {
-            const tbody = document.querySelector('#admin-table tbody');
-            tbody.innerHTML = books.map(book => {
-                const safeId = JSON.stringify(String(book.id || ''));
-                const safeTitle = sanitizeInput(String(book.title || ''));
-                const safeAuthor = sanitizeInput(String(book.author || ''));
-                const safeCategory = sanitizeInput(String(book.category || ''));
-                const safeYear = sanitizeInput(String(book.year || ''));
+        let adminManageView = 'pdf';
+
+        function setAdminManageView(view) {
+            adminManageView = view === 'mp3' ? 'mp3' : 'pdf';
+            const pdfBtn = document.getElementById('admin-manage-tab-pdf');
+            const mp3Btn = document.getElementById('admin-manage-tab-mp3');
+            const pdfView = document.getElementById('admin-manage-pdf');
+            const mp3View = document.getElementById('admin-manage-mp3');
+            if (!pdfBtn || !mp3Btn || !pdfView || !mp3View) return;
+            pdfBtn.classList.toggle('active', adminManageView === 'pdf');
+            mp3Btn.classList.toggle('active', adminManageView === 'mp3');
+            pdfView.classList.toggle('hidden', adminManageView !== 'pdf');
+            mp3View.classList.toggle('hidden', adminManageView !== 'mp3');
+            renderAdminManage();
+        }
+
+        function getTurmaLabel(turmaId) {
+            const key = String(turmaId || '').trim();
+            if (!key) return 'Acervo Geral';
+            const turma = TURMAS.find(t => t.id === key);
+            return turma ? turma.name : key;
+        }
+
+        function sortTurmaKeys(keys) {
+            const order = new Map(TURMAS.map((t, i) => [t.id, i + 1]));
+            return [...keys].sort((a, b) => {
+                const aa = String(a || '').trim();
+                const bb = String(b || '').trim();
+                if (!aa && bb) return -1;
+                if (!bb && aa) return 1;
+                const oa = order.has(aa) ? order.get(aa) : 9999;
+                const ob = order.has(bb) ? order.get(bb) : 9999;
+                if (oa !== ob) return oa - ob;
+                return getTurmaLabel(aa).localeCompare(getTurmaLabel(bb), 'pt-BR', { sensitivity: 'base' });
+            });
+        }
+
+        function renderAdminManage() {
+            const pdfRoot = document.getElementById('admin-manage-pdf');
+            const mp3Root = document.getElementById('admin-manage-mp3');
+            if (!pdfRoot || !mp3Root) return;
+            pdfRoot.innerHTML = renderAdminGroupedHtml({
+                items: books,
+                itemType: 'pdf'
+            });
+            mp3Root.innerHTML = renderAdminGroupedHtml({
+                items: mp3Files,
+                itemType: 'mp3'
+            });
+        }
+
+        function renderAdminGroupedHtml({ items, itemType }) {
+            const groups = new Map();
+            (items || []).forEach(it => {
+                const turmaKey = String(it.turma || '').trim();
+                const moduloKey = String(it.modulo || '').trim() || 'Geral';
+                if (!groups.has(turmaKey)) groups.set(turmaKey, new Map());
+                const byModulo = groups.get(turmaKey);
+                if (!byModulo.has(moduloKey)) byModulo.set(moduloKey, []);
+                byModulo.get(moduloKey).push(it);
+            });
+
+            const turmaKeys = sortTurmaKeys(groups.keys());
+            if (turmaKeys.length === 0) {
+                return `<p style="text-align:center; padding: 40px; color:#777;">Nenhum item cadastrado.</p>`;
+            }
+
+            return turmaKeys.map(turmaKey => {
+                const label = getTurmaLabel(turmaKey);
+                const byModulo = groups.get(turmaKey);
+                const moduloKeys = [...byModulo.keys()].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true, sensitivity: 'base' }));
+                const details = moduloKeys.map(mod => {
+                    const list = byModulo.get(mod) || [];
+                    list.sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'pt-BR', { sensitivity: 'base' }));
+                    const rows = list.map(it => renderAdminItemRow(it, itemType)).join('');
+                    return `
+                        <details class="admin-manage-details" open>
+                            <summary>${sanitizeInput(String(mod))}</summary>
+                            <div class="admin-manage-items">
+                                ${rows || '<p style="color:#777;">Vazio</p>'}
+                            </div>
+                        </details>
+                    `;
+                }).join('');
+
                 return `
-                    <tr>
-                        <td>${safeTitle}</td>
-                        <td>${safeAuthor}</td>
-                        <td>${safeCategory}</td>
-                        <td>${safeYear}</td>
-                        <td class="actions-btns">
-                            <button class="btn btn-sm btn-delete" onclick="deleteBook(${safeId})"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
+                    <div class="module-block">
+                        <div class="module-header" onclick="toggleModule(this)">
+                            <span>${sanitizeInput(String(label))}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="module-content admin-manage-content">
+                            ${details}
+                        </div>
+                    </div>
                 `;
             }).join('');
         }
 
+        function renderAdminItemRow(it, itemType) {
+            const id = String(it.id || '');
+            const safeId = JSON.stringify(id);
+            if (itemType === 'mp3') {
+                const title = sanitizeInput(String(it.title || ''));
+                const artist = sanitizeInput(String(it.artist || ''));
+                const meta = artist ? `Por ${artist}` : '';
+                return `
+                    <div class="admin-item-row">
+                        <div>
+                            <div class="admin-item-title">${title}</div>
+                            ${meta ? `<div class="admin-item-meta">${meta}</div>` : ''}
+                        </div>
+                        <div class="actions-btns">
+                            <button class="btn btn-sm btn-edit" onclick="openAdminEditMp3(${safeId})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-delete" onclick="deleteMp3(${safeId})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const title = sanitizeInput(String(it.title || ''));
+            const author = sanitizeInput(String(it.author || ''));
+            const category = sanitizeInput(String(it.category || ''));
+            const metaParts = [];
+            if (author) metaParts.push(`Por ${author}`);
+            if (category) metaParts.push(category);
+            const meta = metaParts.join(' • ');
+            return `
+                <div class="admin-item-row">
+                    <div>
+                        <div class="admin-item-title">${title}</div>
+                        ${meta ? `<div class="admin-item-meta">${meta}</div>` : ''}
+                    </div>
+                    <div class="actions-btns">
+                        <button class="btn btn-sm btn-edit" onclick="openAdminEditBook(${safeId})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-delete" onclick="deleteBook(${safeId})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+        }
+
         document.getElementById('mp3-form').onsubmit = async (e) => {
             e.preventDefault();
+            if (!requireAdmin()) return;
             
             let externalUrl = document.getElementById('mp3-form-url').value.trim();
             if (externalUrl && !/^https?:\/\//i.test(externalUrl)) {
@@ -2854,6 +3122,7 @@
 
         document.getElementById('book-form').onsubmit = async (e) => {
             e.preventDefault();
+            if (!requireAdmin()) return;
             
             const externalUrl = (document.getElementById('form-url').value || '').trim();
             if (!externalUrl) {
@@ -2903,23 +3172,235 @@
             }
         };
 
-        async function deleteBook(id) {
+        function closeAdminEditModal() {
+            const modal = document.getElementById('admin-edit-modal');
+            const body = document.getElementById('admin-edit-modal-body');
+            if (body) body.innerHTML = '';
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function openAdminEditBook(id) {
+            if (!requireAdmin()) return;
             const book = books.find(b => b.id === id);
+            if (!book) return;
+            const modal = document.getElementById('admin-edit-modal');
+            const titleEl = document.getElementById('admin-edit-modal-title');
+            const body = document.getElementById('admin-edit-modal-body');
+            if (!modal || !titleEl || !body) return;
+
+            titleEl.innerText = 'Editar PDF';
+            const turmaOptions = ['<option value="">Acervo Geral</option>', ...TURMAS.map(t => `<option value="${t.id}">${t.name}</option>`)].join('');
+            const catOptions = CATEGORIES.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+            body.innerHTML = `
+                <form id="admin-edit-book-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Título</label>
+                            <input type="text" id="admin-edit-book-title" value="${sanitizeInput(String(book.title || ''))}">
+                        </div>
+                        <div class="form-group">
+                            <label>Autor(es)</label>
+                            <input type="text" id="admin-edit-book-author" value="${sanitizeInput(String(book.author || ''))}">
+                        </div>
+                        <div class="form-group">
+                            <label>Categoria</label>
+                            <select id="admin-edit-book-category">${catOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ano</label>
+                            <input type="number" id="admin-edit-book-year" value="${sanitizeInput(String(book.year || ''))}">
+                        </div>
+                        <div class="form-group">
+                            <label>Turma (Formação)</label>
+                            <select id="admin-edit-book-turma">${turmaOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>Módulo</label>
+                            <input type="text" id="admin-edit-book-modulo" value="${sanitizeInput(String(book.modulo || ''))}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Link Externo do PDF</label>
+                        <input type="url" id="admin-edit-book-url" value="${sanitizeInput(String(book.url || ''))}">
+                    </div>
+                    <div class="form-group">
+                        <label>Sinopse / Descrição</label>
+                        <textarea id="admin-edit-book-description" rows="4">${sanitizeInput(String(book.description || ''))}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Tags (separadas por vírgula)</label>
+                        <input type="text" id="admin-edit-book-tags" value="${sanitizeInput(String(book.tags || ''))}">
+                    </div>
+                    <div style="display:flex; gap: 20px; align-items:center; margin-bottom: 20px;">
+                        <label><input type="checkbox" id="admin-edit-book-download" ${book.download ? 'checked' : ''}> Permitir Download</label>
+                        <label><input type="checkbox" id="admin-edit-book-public" ${book.public ? 'checked' : ''}> Visibilidade Pública</label>
+                    </div>
+                    <div style="display:flex; gap: 12px; justify-content:flex-end;">
+                        <button type="button" class="btn btn-delete" onclick="closeAdminEditModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            `;
+
+            const catSelect = document.getElementById('admin-edit-book-category');
+            if (catSelect) catSelect.value = String(book.category || '');
+            const turmaSelect = document.getElementById('admin-edit-book-turma');
+            if (turmaSelect) turmaSelect.value = String(book.turma || '');
+
+            const form = document.getElementById('admin-edit-book-form');
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                const patch = {
+                    title: document.getElementById('admin-edit-book-title').value,
+                    author: document.getElementById('admin-edit-book-author').value,
+                    category: document.getElementById('admin-edit-book-category').value,
+                    turma: document.getElementById('admin-edit-book-turma').value,
+                    modulo: document.getElementById('admin-edit-book-modulo').value,
+                    url: document.getElementById('admin-edit-book-url').value,
+                    year: parseInt(document.getElementById('admin-edit-book-year').value) || book.year || 2024,
+                    description: document.getElementById('admin-edit-book-description').value,
+                    tags: document.getElementById('admin-edit-book-tags').value,
+                    download: document.getElementById('admin-edit-book-download').checked,
+                    public: document.getElementById('admin-edit-book-public').checked
+                };
+                try {
+                    await fbUpdate('books', book._docId || book.id, patch);
+                    Object.assign(book, patch);
+                    renderHighlights();
+                    renderBooksGrid(books);
+                    renderAdminManage();
+                    addAuditLog('EDITAR_LIVRO', `Livro "${book.title}" atualizado.`);
+                    closeAdminEditModal();
+                } catch (err) {
+                    const code = err && err.code ? String(err.code) : '';
+                    const msg = err && err.message ? String(err.message) : '';
+                    alert(`Erro ao atualizar livro.\n${code ? `Código: ${code}\n` : ''}${msg ? `Detalhe: ${msg}` : ''}`);
+                }
+            };
+
+            modal.classList.remove('hidden');
+        }
+
+        async function openAdminEditMp3(id) {
+            if (!requireAdmin()) return;
+            const mp3 = mp3Files.find(m => m.id === id);
+            if (!mp3) return;
+            const modal = document.getElementById('admin-edit-modal');
+            const titleEl = document.getElementById('admin-edit-modal-title');
+            const body = document.getElementById('admin-edit-modal-body');
+            if (!modal || !titleEl || !body) return;
+
+            titleEl.innerText = 'Editar Mp3';
+            const turmaOptions = ['<option value="">Acervo Geral</option>', ...TURMAS.map(t => `<option value="${t.id}">${t.name}</option>`)].join('');
+            body.innerHTML = `
+                <form id="admin-edit-mp3-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Título</label>
+                            <input type="text" id="admin-edit-mp3-title" value="${sanitizeInput(String(mp3.title || ''))}">
+                        </div>
+                        <div class="form-group">
+                            <label>Artista</label>
+                            <input type="text" id="admin-edit-mp3-artist" value="${sanitizeInput(String(mp3.artist || ''))}">
+                        </div>
+                        <div class="form-group">
+                            <label>Álbum</label>
+                            <input type="text" id="admin-edit-mp3-album" value="${sanitizeInput(String(mp3.album || ''))}">
+                        </div>
+                        <div class="form-group">
+                            <label>Turma (Formação)</label>
+                            <select id="admin-edit-mp3-turma">${turmaOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>Módulo</label>
+                            <input type="text" id="admin-edit-mp3-modulo" value="${sanitizeInput(String(mp3.modulo || ''))}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Link Externo do Mp3</label>
+                        <input type="url" id="admin-edit-mp3-url" value="${sanitizeInput(String(mp3.url || ''))}">
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <textarea id="admin-edit-mp3-description" rows="3">${sanitizeInput(String(mp3.description || ''))}</textarea>
+                    </div>
+                    <div style="display:flex; gap: 12px; justify-content:flex-end;">
+                        <button type="button" class="btn btn-delete" onclick="closeAdminEditModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            `;
+
+            const turmaSelect = document.getElementById('admin-edit-mp3-turma');
+            if (turmaSelect) turmaSelect.value = String(mp3.turma || '');
+
+            const form = document.getElementById('admin-edit-mp3-form');
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                const patch = {
+                    title: document.getElementById('admin-edit-mp3-title').value,
+                    artist: document.getElementById('admin-edit-mp3-artist').value,
+                    album: document.getElementById('admin-edit-mp3-album').value,
+                    turma: document.getElementById('admin-edit-mp3-turma').value,
+                    modulo: document.getElementById('admin-edit-mp3-modulo').value,
+                    url: document.getElementById('admin-edit-mp3-url').value,
+                    description: document.getElementById('admin-edit-mp3-description').value
+                };
+                try {
+                    await fbUpdate('mp3files', mp3._docId || mp3.id, patch);
+                    Object.assign(mp3, patch);
+                    renderMp3Grid(mp3Files);
+                    renderAdminManage();
+                    addAuditLog('EDITAR_MP3', `Áudio "${mp3.title}" atualizado.`);
+                    closeAdminEditModal();
+                } catch (err) {
+                    const code = err && err.code ? String(err.code) : '';
+                    const msg = err && err.message ? String(err.message) : '';
+                    alert(`Erro ao atualizar MP3.\n${code ? `Código: ${code}\n` : ''}${msg ? `Detalhe: ${msg}` : ''}`);
+                }
+            };
+
+            modal.classList.remove('hidden');
+        }
+
+        async function deleteBook(id) {
+            if (!requireAdmin()) return;
+            const book = books.find(b => b.id === id);
+            if (!book) return;
             if (confirm(`Tem certeza que deseja excluir o livro "${book.title}"?`)) {
                 try {
-                    if (book._docId) {
-                        await fbDelete('books', book._docId);
-                    }
+                    await fbDelete('books', book._docId || book.id);
                     books = books.filter(b => b.id !== id);
                     
                     addAuditLog('EXCLUIR_LIVRO', `Livro "${book.title}" excluído do acervo.`);
-                    renderAdminTable();
+                    renderAdminManage();
                     updateStats();
                     updateAdminDashboard();
                     renderHighlights();
                     renderBooksGrid(books);
                 } catch (err) {
                     console.error("Erro ao excluir livro do banco:", err);
+                    alert("Erro ao excluir do banco de dados.");
+                }
+            }
+        }
+
+        async function deleteMp3(id) {
+            if (!requireAdmin()) return;
+            const mp3 = mp3Files.find(m => m.id === id);
+            if (!mp3) return;
+            if (confirm(`Tem certeza que deseja excluir o MP3 "${mp3.title}"?`)) {
+                try {
+                    await fbDelete('mp3files', mp3._docId || mp3.id);
+                    mp3Files = mp3Files.filter(m => m.id !== id);
+                    addAuditLog('EXCLUIR_MP3', `MP3 "${mp3.title}" excluído do acervo.`);
+                    renderAdminManage();
+                    updateStats();
+                    updateAdminDashboard();
+                    renderMp3Grid(mp3Files);
+                } catch (err) {
+                    console.error("Erro ao excluir MP3 do banco:", err);
                     alert("Erro ao excluir do banco de dados.");
                 }
             }
