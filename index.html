@@ -1267,12 +1267,6 @@
                             <!-- Upload Mp3 Tab -->
                             <div id="tab-upload-mp3" class="hidden">
                                 <h3>Adicionar Novo Mp3</h3>
-                                <div class="upload-area" id="drop-area-mp3">
-                                    <i class="fas fa-music" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i>
-                                    <p>Opcional: arraste o arquivo MP3 aqui ou clique para selecionar (ou informe apenas o link externo abaixo)</p>
-                                    <input type="file" id="mp3-file-input" hidden accept=".mp3">
-                                </div>
-
                                 <form id="mp3-form" novalidate>
                                     <div class="form-grid">
                                         <div class="form-group">
@@ -1286,10 +1280,6 @@
                                         <div class="form-group">
                                             <label>Álbum</label>
                                             <input type="text" id="mp3-form-album">
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Ano</label>
-                                            <input type="number" id="mp3-form-year">
                                         </div>
                                         <div class="form-group">
                                             <label>Turma (Formação)</label>
@@ -1321,12 +1311,6 @@
                             <!-- Upload Tab -->
                             <div id="tab-upload" class="hidden">
                                 <h3>Adicionar Nova Obra</h3>
-                                <div class="upload-area" id="drop-area">
-                                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i>
-                                    <p>Arraste o PDF aqui ou clique para selecionar</p>
-                                    <input type="file" id="file-input" hidden accept=".pdf">
-                                </div>
-
                                 <form id="book-form">
                                     <div class="form-grid">
                                         <div class="form-group">
@@ -1513,9 +1497,9 @@
                     <h4>Navegação</h4>
                     <ul>
                         <li><a href="#" onclick="showSection('home')">Início</a></li>
-                        <li><a href="#" onclick="showSection('acervo')">Acervo</a></li>
-                        <li><a href="#" onclick="showSection('acervo-mp3')">Acervo Mp3</a></li>
-                        <li><a href="#" onclick="showSection('categorias')">Categorias</a></li>
+                        <li><a href="#" onclick="showSection('acervo')"></a></li>
+                        <li><a href="#" onclick="showSection('acervo-mp3')"></a></li>
+                        <li><a href="#" onclick="showSection('categorias')"></a></li>
                     </ul>
                 </div>
                 <div class="footer-links">
@@ -1539,76 +1523,50 @@
         </div>
     </footer>
 
-    <!-- ============================================================
-         FIREBASE SDK
-         IMPORTANTE: Substitua o objeto firebaseConfig abaixo
-         pelas suas credenciais do Firebase Console!
-         ============================================================ -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
-        // =====================================================
-        // ⚠️ SUBSTITUA AQUI pelas suas credenciais do Firebase
-        // =====================================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyDmZ06mk0nhbWlExF-Vl-rZzfwkecrgesU",
-            authDomain: "biblioteca-virtual-f975c.firebaseapp.com",
-            projectId: "biblioteca-virtual-f975c",
-            storageBucket: "biblioteca-virtual-f975c.firebasestorage.app",
-            messagingSenderId: "534901842021",
-            appId: "1:534901842021:web:1c2e3a66a3a6269b71668c"
-        };
-        // =====================================================
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Expõe para o escopo global
-        window._auth = { auth, signInWithEmailAndPassword, signOut, onAuthStateChanged };
-        window._firestore = { db, collection, getDocs, addDoc, deleteDoc, doc, getDoc };
+    <!-- SUPABASE SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://ezawthwkfaheguykejsm.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6YXd0aHdrZmFoZWd1eWtlanNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTU2MjksImV4cCI6MjA5MTMzMTYyOX0.Lj4Q-kfaBfwiEu29rBZEZYguxBfLFa7cITsd2KqTDa4';
+        window._supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         window._dbReady = true;
-        window.dispatchEvent(new Event('firebaseReady'));
     </script>
 
     <script>
-        // --- FIREBASE HELPERS ---
-        function getFS() { return window._firestore; }
-        function getAuthCtx() { return window._auth; }
+        // --- SUPABASE HELPERS ---
+        function getSB() { return window._supabase; }
 
-        async function fbGetAll(collectionName) {
-            const { db, collection, getDocs } = getFS();
-            const snap = await getDocs(collection(db, collectionName));
-            return snap.docs.map(d => ({ ...d.data(), _docId: d.id }));
+        async function fbGetAll(tableName) {
+            const { data, error } = await getSB().from(tableName).select('*');
+            if (error) throw { code: error.code || 'error', message: error.message };
+            return (data || []).map(d => {
+                const docId = d.id;
+                return { ...d, id: String(docId), _docId: docId };
+            });
         }
 
-        async function fbAdd(collectionName, data) {
-            const { db, collection, addDoc } = getFS();
-            const ref = await addDoc(collection(db, collectionName), data);
-            return ref.id;
+        async function fbAdd(tableName, data) {
+            const { data: inserted, error } = await getSB().from(tableName).insert([data]).select();
+            if (error) throw { code: error.code || 'error', message: error.message };
+            return inserted[0].id;
         }
 
-        async function fbDelete(collectionName, docId) {
-            const { db, doc, deleteDoc } = getFS();
-            await deleteDoc(doc(db, collectionName, docId));
+        async function fbDelete(tableName, docId) {
+            const { error } = await getSB().from(tableName).delete().eq('id', docId);
+            if (error) throw { code: error.code || 'error', message: error.message };
         }
 
         // --- DATA & CONFIG ---
         let books = [];
         let mp3Files = [];
         let videos = [];
-        let db;
-        const DB_NAME = 'LibraryDB';
-        const STORE_NAME = 'books_files';
-        const STORE_NAME_MP3 = 'mp3_files';
-        const STORE_NAME_VIDEOS = 'video_files';
         const ADMIN_EMAIL = 'jairo.coelho73@gmail.com';
         let isAdminAuthenticated = false;
         let currentUserRole = 'CONSULTA';
         let sessionTimeout = null;
         const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours as per security requirements
+
+
 
         const TURMAS = [
             { id: 'asg', name: 'ASG - 2ª Turma', desc: 'TMIE - Auxiliar de Serviços Gerais', initial: 'A' },
@@ -1636,46 +1594,10 @@
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             checkStorageHealth();
-            initDB();
             checkLGPD();
             restoreSession();
-
-            const onFirebaseReady = () => {
-                initFirebaseAuth();
-                loadAllData();
-            };
-
-            if (window._dbReady) onFirebaseReady();
-            else window.addEventListener('firebaseReady', onFirebaseReady);
+            loadAllData();
         });
-
-        function initFirebaseAuth() {
-            const authCtx = getAuthCtx();
-            if (!authCtx || !authCtx.auth) return;
-
-            authCtx.onAuthStateChanged(authCtx.auth, async (user) => {
-                if (!user || (user.email || '').toLowerCase() !== ADMIN_EMAIL) {
-                    isAdminAuthenticated = false;
-                    currentUserRole = 'CONSULTA';
-                    return;
-                }
-
-                try {
-                    const { db, doc, getDoc } = getFS();
-                    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-                    if (adminDoc.exists()) {
-                        isAdminAuthenticated = true;
-                        currentUserRole = 'ADMIN';
-                    } else {
-                        isAdminAuthenticated = false;
-                        currentUserRole = 'CONSULTA';
-                    }
-                } catch {
-                    isAdminAuthenticated = false;
-                    currentUserRole = 'CONSULTA';
-                }
-            });
-        }
 
         // --- SECURITY & AUDIT LOGS ---
         function addAuditLog(action, details) {
@@ -1758,7 +1680,6 @@
             if (start && role && (Date.now() - parseInt(start, 10)) < SESSION_DURATION) {
                 currentUserRole = role;
                 isAdminAuthenticated = true;
-                // UI will be updated if user navigates to admin
             }
         }
 
@@ -1806,26 +1727,6 @@
                  window.currentUploadCover = null;
              }
          }
-
-        // IndexedDB for storing files
-        function initDB() {
-            const request = indexedDB.open(DB_NAME, 3); // Version 3 for video store
-            request.onupgradeneeded = (e) => {
-                db = e.target.result;
-                if (!db.objectStoreNames.contains(STORE_NAME)) {
-                    db.createObjectStore(STORE_NAME);
-                }
-                if (!db.objectStoreNames.contains(STORE_NAME_MP3)) {
-                    db.createObjectStore(STORE_NAME_MP3);
-                }
-                if (!db.objectStoreNames.contains(STORE_NAME_VIDEOS)) {
-                    db.createObjectStore(STORE_NAME_VIDEOS);
-                }
-            };
-            request.onsuccess = (e) => {
-                db = e.target.result;
-            };
-        }
 
         let storageUnavailableWarned = false;
         let isStorageWritable = true;
@@ -1888,25 +1789,42 @@
         }
 
         async function loadAllData() {
+            const formatDbError = (err, target) => {
+                const code = err && err.code ? String(err.code) : '';
+                const msg = err && err.message ? String(err.message) : '';
+                let hint = '';
+                if (code.includes('permission-denied')) hint = 'Permissão negada (políticas/RLS do Supabase).';
+                else if (code.includes('failed-precondition')) hint = 'Banco/tabela pode não estar criado/ativado no Supabase.';
+                else if (code.includes('unavailable')) hint = 'Serviço indisponível ou bloqueado por rede/extensão.';
+                else if (code.includes('invalid-argument')) hint = 'Configuração/consulta inválida.';
+                return `Falha ao carregar "${target}".\n${code ? `Código: ${code}\n` : ''}${msg ? `Detalhe: ${msg}\n` : ''}${hint ? `Dica: ${hint}` : ''}`;
+            };
+
             try {
                 books = await fbGetAll('books');
-                mp3Files = await fbGetAll('mp3files');
-                // Mantém local para não precisar de backend de vídeos por enquanto, se existirem
-                const storedVideos = safeStorageGet('library_videos');
-                if (storedVideos) {
-                    videos = JSON.parse(storedVideos);
-                }
-
-                renderHighlights();
-                renderBooksGrid(books);
-                renderMp3Grid(mp3Files);
-                renderTurmas();
-                updateStats();
-                populateTurmaSelects();
             } catch (err) {
-                console.error('Erro ao carregar dados:', err);
-                alert('Erro ao conectar com o banco de dados. Verifique as configurações do Firebase.');
+                console.warn('Erro ao carregar books:', err.code);
+                books = [];
             }
+
+            try {
+                mp3Files = await fbGetAll('mp3files');
+            } catch (err) {
+                console.warn('Erro ao carregar mp3files:', err.code);
+                mp3Files = [];
+            }
+
+            const storedVideos = safeStorageGet('library_videos');
+            if (storedVideos) {
+                videos = JSON.parse(storedVideos);
+            }
+
+            renderHighlights();
+            renderBooksGrid(books);
+            renderMp3Grid(mp3Files);
+            renderTurmas();
+            updateStats();
+            populateTurmaSelects();
         }
 
         function populateTurmaSelects() {
@@ -1953,12 +1871,21 @@
             const container = document.getElementById('modules-container');
             
             // Get all unique modules for this turma
-            const turmaBooks = books.filter(b => b.turma === turmaId);
-            const turmaMp3 = mp3Files.filter(a => a.turma === turmaId);
-            const turmaVideos = videos.filter(v => v.turma === turmaId);
+            const tid = String(turmaId).trim();
+            const turmaBooks = books.filter(b => String(b.turma || '').trim() === tid);
+            const turmaMp3 = mp3Files.filter(a => String(a.turma || '').trim() === tid);
+            const turmaVideos = videos.filter(v => String(v.turma || '').trim() === tid);
             
             const allContent = [...turmaBooks, ...turmaMp3, ...turmaVideos];
-            const modules = [...new Set(allContent.map(item => item.modulo))].filter(m => m).sort();
+            const getModulo = (item) => {
+                const m = item && item.modulo != null ? String(item.modulo).trim() : '';
+                return m ? m : 'Geral';
+            };
+            const modules = [...new Set(allContent.map(getModulo))].sort((a, b) => {
+                if (a === 'Geral' && b !== 'Geral') return -1;
+                if (b === 'Geral' && a !== 'Geral') return 1;
+                return a.localeCompare(b, 'pt-BR', { numeric: true, sensitivity: 'base' });
+            });
             
             if (modules.length === 0) {
                 container.innerHTML = '<p style="text-align: center; padding: 40px; color: #777;">Nenhum conteúdo cadastrado para esta turma ainda.</p>';
@@ -1966,9 +1893,9 @@
             }
 
             container.innerHTML = modules.map(m => {
-                const moduleBooks = turmaBooks.filter(b => b.modulo == m);
-                const moduleMp3 = turmaMp3.filter(a => a.modulo == m);
-                const moduleVideos = turmaVideos.filter(v => v.modulo == m);
+                const moduleBooks = turmaBooks.filter(b => getModulo(b) == m);
+                const moduleMp3 = turmaMp3.filter(a => getModulo(a) == m);
+                const moduleVideos = turmaVideos.filter(v => getModulo(v) == m);
 
                 return `
                     <div class="module-block">
@@ -2041,22 +1968,7 @@
                 playVideo(formatExternalUrl(video.url));
                 return;
             }
-
-            // Priority 2: IndexedDB
-            const tx = db.transaction(STORE_NAME_VIDEOS, 'readonly');
-            const store = tx.objectStore(STORE_NAME_VIDEOS);
-            const request = store.get(id);
-
-            request.onsuccess = () => {
-                const videoData = request.result;
-                if (!videoData) {
-                    alert("Arquivo de vídeo não encontrado.");
-                    return;
-                }
-                const blob = new Blob([videoData], { type: 'video/mp4' });
-                const url = URL.createObjectURL(blob);
-                playVideo(url);
-            };
+            alert("Este vídeo não possui link externo configurado.");
         }
 
         function closeVideoViewer() {
@@ -2200,7 +2112,6 @@
 
             const driveId = mp3Item.url ? getDriveFileId(mp3Item.url) : null;
             const coverSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000` : getDefaultMp3CoverDataUrl(mp3Item.title);
-
             const content = document.getElementById('mp3-details-content');
             content.innerHTML = `
                 <div class="book-details">
@@ -2212,7 +2123,7 @@
                         <div class="details-meta">
                             <div class="meta-item"><span class="meta-label">Turma:</span><span>${mp3Item.turma || '-'}</span></div>
                             <div class="meta-item"><span class="meta-label">Módulo:</span><span>${mp3Item.modulo || '-'}</span></div>
-                            <div class="meta-item"><span class="meta-label">Ano:</span><span>${mp3Item.year || '-'}</span></div>
+                            <div class="meta-item"><span class="meta-label">Ano:</span><span>${mp3Item.ano || mp3Item.year || '-'}</span></div>
                         </div>
                         <div class="details-actions">
                             <button class="btn btn-read" onclick="playMp3Details('${id}')"><i class="fas fa-play"></i> Ouvir</button>
@@ -2260,20 +2171,7 @@
                 });
                 return;
             }
-
-            const tx = db.transaction(STORE_NAME_MP3, 'readonly');
-            const store = tx.objectStore(STORE_NAME_MP3);
-            const request = store.get(id);
-            request.onsuccess = () => {
-                const audioData = request.result;
-                if (!audioData) {
-                    alert('Áudio não encontrado.');
-                    return;
-                }
-                const blob = new Blob([audioData], { type: 'audio/mpeg' });
-                audio.src = URL.createObjectURL(blob);
-                audio.play().catch(() => {});
-            };
+            alert("Este áudio não possui link externo configurado. Para alunos acessarem em qualquer lugar, use um link público do Google Drive.");
         }
 
         function downloadMp3(id) {
@@ -2287,22 +2185,7 @@
                 a.click();
                 return;
             }
-            const tx = db.transaction(STORE_NAME_MP3, 'readonly');
-            const store = tx.objectStore(STORE_NAME_MP3);
-            const request = store.get(id);
-            request.onsuccess = () => {
-                const audioData = request.result;
-                if (audioData) {
-                    const blob = new Blob([audioData], { type: 'audio/mpeg' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${mp3Item.title}.mp3`;
-                    a.click();
-                } else {
-                    alert('Arquivo não encontrado para download.');
-                }
-            };
+            alert("Este áudio não possui link externo configurado para download.");
         }
 
         function renderCategories() {
@@ -2517,22 +2400,7 @@
                 playAudio(formatExternalUrl(mp3Item.url));
                 return;
             }
-
-            // Priority 2: IndexedDB
-            const tx = db.transaction(STORE_NAME_MP3, 'readonly');
-            const store = tx.objectStore(STORE_NAME_MP3);
-            const request = store.get(id);
-
-            request.onsuccess = () => {
-                const audioData = request.result;
-                if (!audioData) {
-                    alert("Arquivo de áudio não encontrado.");
-                    return;
-                }
-                const blob = new Blob([audioData], { type: 'audio/mpeg' });
-                const url = URL.createObjectURL(blob);
-                playAudio(url);
-            };
+            alert("Este áudio não possui link externo configurado. Para alunos acessarem em qualquer lugar, use um link público do Google Drive.");
         }
 
         function seekMp3(e, id) {
@@ -2550,9 +2418,9 @@
             if (!book) return;
             
             book.views = (book.views || 0) + 1;
-            saveBooks();
             
             const details = document.getElementById('book-details-content');
+            const tags = (book.tags || '').toString().split(',').map(t => t.trim()).filter(Boolean);
             details.innerHTML = `
                 <div class="book-details">
                     <div class="details-cover-container">
@@ -2586,7 +2454,7 @@
                             <h3>Sinopse</h3>
                             <p>${book.description || 'Nenhuma descrição disponível.'}</p>
                             <div style="margin-top: 20px;">
-                                ${book.tags.split(',').map(tag => `<span style="background: var(--secondary); color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; margin-right: 8px;">#${tag.trim()}</span>`).join('')}
+                                ${tags.map(tag => `<span style="background: var(--secondary); color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; margin-right: 8px;">#${tag.trim()}</span>`).join('')}
                             </div>
                         </div>
                     </div>
@@ -2624,6 +2492,11 @@
             // Priority 1: External URL
             if (book.url) {
                 const formattedUrl = formatExternalUrl(book.url);
+                if (!formattedUrl) {
+                    alert("Link do PDF inválido. Use um link público (Google Drive/URL direta).");
+                    closeViewer();
+                    return;
+                }
                 try {
                     const loadingTask = pdfjsLib.getDocument(formattedUrl);
                     pdfDoc = await loadingTask.promise;
@@ -2648,25 +2521,8 @@
                     }
                 }
             }
-
-            // Priority 2: IndexedDB (Local Storage)
-            const tx = db.transaction(STORE_NAME, 'readonly');
-            const store = tx.objectStore(STORE_NAME);
-            const request = store.get(id);
-            
-            request.onsuccess = async () => {
-                const fileData = request.result;
-                if (fileData) {
-                    const loadingTask = pdfjsLib.getDocument(fileData);
-                    pdfDoc = await loadingTask.promise;
-                    document.getElementById('page-count').textContent = pdfDoc.numPages;
-                    renderPage(1);
-                } else {
-                    // Simulated loading for demo books
-                    alert("Este é um livro de demonstração ou arquivo não encontrado.");
-                    closeViewer();
-                }
-            };
+            alert("Este livro não possui link externo configurado. Para alunos acessarem em qualquer lugar, cadastre o link público do Google Drive.");
+            closeViewer();
         }
 
         function renderPage(num) {
@@ -2730,23 +2586,16 @@
 
         function downloadBook(id) {
             const book = books.find(b => b.id === id);
-            const tx = db.transaction(STORE_NAME, 'readonly');
-            const store = tx.objectStore(STORE_NAME);
-            const request = store.get(id);
-            
-            request.onsuccess = () => {
-                const fileData = request.result;
-                if (fileData) {
-                    const blob = new Blob([fileData], { type: 'application/pdf' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${book.title} - ${book.author}.pdf`;
-                    a.click();
-                } else {
-                    alert("Arquivo não disponível para download neste exemplo.");
-                }
-            };
+            if (!book) return;
+            if (!book.url) {
+                alert("Este livro não possui link externo configurado para download.");
+                return;
+            }
+            const a = document.createElement('a');
+            a.href = formatExternalUrl(book.url);
+            a.download = `${book.title} - ${book.author}.pdf`;
+            a.target = '_blank';
+            a.click();
         }
 
         // --- ADMIN LOGIC ---
@@ -2817,60 +2666,41 @@
                 const fileId = doc[google.picker.Document.ID];
                 const fileName = doc[google.picker.Document.NAME];
                 
-                document.getElementById('drive-status').innerText = `Importando: ${fileName}...`;
-                
-                try {
-                    const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-                        headers: { 'Authorization': `Bearer ${accessToken}` }
-                    });
-                    const blob = await response.blob();
-                    const file = new File([blob], fileName, { type: 'application/pdf' });
-                    
-                    // Call our existing processing logic
-                    showAdminTab('upload');
-                    await handleFile(file);
-                    document.getElementById('drive-status').innerText = `Sucesso! Complete o cadastro abaixo.`;
-                } catch (err) {
-                    console.error("Erro no download do Drive:", err);
-                    alert("Erro ao baixar arquivo do Google Drive.");
-                }
+                const url = `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+                document.getElementById('drive-status').innerText = `Arquivo selecionado: ${fileName}`;
+                showAdminTab('upload');
+                const urlInput = document.getElementById('form-url');
+                if (urlInput) urlInput.value = url;
+                const titleInput = document.getElementById('form-title');
+                if (titleInput && !titleInput.value) titleInput.value = (fileName || '').replace(/\.pdf$/i, '');
+                await extractCoverFromExternalUrl(url);
             }
         }
 
         async function loginAdmin() {
             const email = (document.getElementById('admin-user').value || '').trim().toLowerCase();
             const pass = document.getElementById('admin-pass').value || '';
+            const loginErrorEl = document.getElementById('login-error');
+            const setLoginError = (msg) => {
+                if (!loginErrorEl) return;
+                loginErrorEl.textContent = msg;
+                loginErrorEl.classList.remove('hidden');
+            };
+            const clearLoginError = () => {
+                if (!loginErrorEl) return;
+                loginErrorEl.classList.add('hidden');
+            };
 
-            if (!email || !pass) {
-                document.getElementById('login-error').classList.remove('hidden');
-                return;
-            }
-
-            if (email !== ADMIN_EMAIL) {
-                document.getElementById('login-error').classList.remove('hidden');
-                addAuditLog('LOGIN_FALHA', `Tentativa de login (email não autorizado): ${email}`);
-                return;
-            }
-
-            const authCtx = getAuthCtx();
-            if (!authCtx || !authCtx.auth) {
-                alert('Firebase Auth não está pronto. Recarregue a página.');
-                return;
-            }
+            if (!email || !pass) { setLoginError('Informe e-mail e senha.'); return; }
 
             try {
-                const { auth, signInWithEmailAndPassword } = authCtx;
-                const cred = await signInWithEmailAndPassword(auth, email, pass);
-
-                const { db, doc, getDoc } = getFS();
-                const adminDoc = await getDoc(doc(db, 'admins', cred.user.uid));
-                if (!adminDoc.exists()) {
-                    await authCtx.signOut(auth);
-                    document.getElementById('login-error').classList.remove('hidden');
-                    addAuditLog('LOGIN_FALHA', `Login bloqueado (sem permissão de admin): ${email}`);
+                const { data, error } = await getSB().auth.signInWithPassword({ email, password: pass });
+                if (error) throw error;
+                if (data.user.email.toLowerCase() !== ADMIN_EMAIL) {
+                    await getSB().auth.signOut();
+                    setLoginError('E-mail não autorizado para administrador.');
                     return;
                 }
-
                 isAdminAuthenticated = true;
                 currentUserRole = 'ADMIN';
                 document.getElementById('admin-login-view').classList.add('hidden');
@@ -2878,14 +2708,16 @@
                 updateAdminDashboard();
                 startSessionTimer();
                 addAuditLog('LOGIN', 'Login realizado com sucesso como ADMIN.');
-
                 document.getElementById('admin-user').value = '';
                 document.getElementById('admin-pass').value = '';
-                document.getElementById('login-error').classList.add('hidden');
+                clearLoginError();
             } catch (err) {
-                console.error('Erro no login Firebase:', err);
-                document.getElementById('login-error').classList.remove('hidden');
+                console.error('Erro no login:', err);
                 addAuditLog('LOGIN_FALHA', `Tentativa de login falha para: ${email}`);
+                const msg = err.message || '';
+                if (msg.includes('Invalid login')) setLoginError('E-mail ou senha incorretos.');
+                else if (msg.includes('Email not confirmed')) setLoginError('E-mail não confirmado.');
+                else setLoginError(`Falha no login: ${msg}`);
             }
         }
 
@@ -2896,16 +2728,7 @@
             if (sessionTimeout) clearTimeout(sessionTimeout);
             safeStorageRemove('session_start');
             safeStorageRemove('session_role');
-
-            const authCtx = getAuthCtx();
-            if (authCtx && authCtx.auth) {
-                try {
-                    await authCtx.signOut(authCtx.auth);
-                } catch (e) {
-                    // ignore
-                }
-            }
-
+            try { await getSB().auth.signOut(); } catch(e) {}
             document.getElementById('admin-login-view').classList.remove('hidden');
             document.getElementById('admin-dashboard-view').classList.add('hidden');
             if (isAuto) alert("Sua sessão expirou por segurança. Por favor, faça login novamente.");
@@ -2954,68 +2777,24 @@
 
         function renderAdminTable() {
             const tbody = document.querySelector('#admin-table tbody');
-            tbody.innerHTML = books.map(book => `
-                <tr>
-                    <td>${book.title}</td>
-                    <td>${book.author}</td>
-                    <td>${book.category}</td>
-                    <td>${book.year}</td>
-                    <td class="actions-btns">
-                        <button class="btn btn-sm btn-edit" onclick="editBook('${book.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-delete" onclick="deleteBook('${book.id}')"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // Upload Logic
-        const dropArea = document.getElementById('drop-area');
-        const fileInput = document.getElementById('file-input');
-        const dropAreaMp3 = document.getElementById('drop-area-mp3');
-        const mp3FileInput = document.getElementById('mp3-file-input');
-
-        if (dropArea && fileInput) dropArea.onclick = () => fileInput.click();
-        if (dropAreaMp3 && mp3FileInput) dropAreaMp3.onclick = () => mp3FileInput.click();
-        
-        if (fileInput) fileInput.onchange = (e) => handleFile(e.target.files[0]);
-        if (mp3FileInput) mp3FileInput.onchange = (e) => handleMp3File(e.target.files[0]);
-        
-        if (dropArea) dropArea.ondragover = (e) => { e.preventDefault(); dropArea.style.background = 'rgba(212, 175, 55, 0.2)'; };
-        if (dropArea) dropArea.ondragleave = () => { dropArea.style.background = 'transparent'; };
-        if (dropArea) dropArea.ondrop = (e) => {
-            e.preventDefault();
-            handleFile(e.dataTransfer.files[0]);
-        };
-
-        if (dropAreaMp3) dropAreaMp3.ondragover = (e) => { e.preventDefault(); dropAreaMp3.style.background = 'rgba(212, 175, 55, 0.2)'; };
-        if (dropAreaMp3) dropAreaMp3.ondragleave = () => { dropAreaMp3.style.background = 'transparent'; };
-        if (dropAreaMp3) dropAreaMp3.ondrop = (e) => {
-            e.preventDefault();
-            handleMp3File(e.dataTransfer.files[0]);
-        };
-
-        async function handleMp3File(file) {
-            if (!file || file.type !== 'audio/mpeg') {
-                alert("Por favor, selecione um arquivo MP3.");
-                return;
-            }
-
-            dropAreaMp3.innerHTML = `<i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i><p>Analisando arquivo...</p>`;
-
-            const name = file.name.replace('.mp3', '');
-            let title = name, artist = 'Desconhecido';
-
-            if (name.includes(' - ')) {
-                const parts = name.split(' - ');
-                artist = parts[0];
-                title = parts[1];
-            }
-
-            document.getElementById('mp3-form-title').value = title;
-            document.getElementById('mp3-form-artist').value = artist;
-
-            window.currentUploadMp3File = file;
-            dropAreaMp3.innerHTML = `<i class="fas fa-check-circle" style="color: green; font-size: 3rem;"></i><p>${file.name} pronto para salvar!</p>`;
+            tbody.innerHTML = books.map(book => {
+                const safeId = JSON.stringify(String(book.id || ''));
+                const safeTitle = sanitizeInput(String(book.title || ''));
+                const safeAuthor = sanitizeInput(String(book.author || ''));
+                const safeCategory = sanitizeInput(String(book.category || ''));
+                const safeYear = sanitizeInput(String(book.year || ''));
+                return `
+                    <tr>
+                        <td>${safeTitle}</td>
+                        <td>${safeAuthor}</td>
+                        <td>${safeCategory}</td>
+                        <td>${safeYear}</td>
+                        <td class="actions-btns">
+                            <button class="btn btn-sm btn-delete" onclick="deleteBook(${safeId})"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         document.getElementById('mp3-form').onsubmit = async (e) => {
@@ -3025,8 +2804,8 @@
             if (externalUrl && !/^https?:\/\//i.test(externalUrl)) {
                 externalUrl = `https://${externalUrl}`;
             }
-            if (!window.currentUploadMp3File && !externalUrl) {
-                alert("Por favor, selecione um arquivo MP3 ou informe o link externo.");
+            if (!externalUrl) {
+                alert("Para alunos acessarem em qualquer lugar, é obrigatório informar um link externo público (Google Drive/Dropbox/URL direta).");
                 return;
             }
 
@@ -3036,7 +2815,6 @@
                 title: document.getElementById('mp3-form-title').value,
                 artist: document.getElementById('mp3-form-artist').value,
                 album: document.getElementById('mp3-form-album').value,
-                year: parseInt(document.getElementById('mp3-form-year').value) || new Date().getFullYear(),
                 turma: document.getElementById('mp3-form-turma').value,
                 modulo: document.getElementById('mp3-form-modulo').value,
                 url: externalUrl,
@@ -3044,134 +2822,26 @@
                 dateAdded: Date.now()
             };
 
-            if (window.currentUploadMp3File) {
-                // Ignore local file upload because we are using Firebase Metadata without Storage.
-                // We could upload it if Firebase Storage was configured, but we only have Firestore here.
-                alert("Atenção: O arquivo local não será sincronizado. Por favor, use links externos para que outros alunos possam acessar.");
-            }
-
             try {
                 const docId = await fbAdd('mp3files', newMp3);
-                mp3Files.push({ ...newMp3, _docId: docId });
+                mp3Files.push({ ...newMp3, id: String(docId || id), _docId: (docId || id) });
                 renderMp3Grid(mp3Files);
                 updateStats();
                 updateAdminDashboard();
                 
                 addAuditLog('ADICIONAR_MP3', `Áudio "${newMp3.title}" adicionado.`);
-                alert("MP3 salvo com sucesso no Firebase!");
+                alert("MP3 salvo com sucesso no banco!");
                 e.target.reset();
-                window.currentUploadMp3File = null;
-                dropAreaMp3.innerHTML = `<i class="fas fa-music" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i><p>Apenas link externo (Google Drive) é suportado nesta versão global.</p>`;
                 const mp3Search = document.getElementById('search-mp3-input');
                 if (mp3Search) mp3Search.value = '';
                 showSection('acervo-mp3');
             } catch (err) {
-                console.error("Erro ao salvar MP3 no Firebase:", err);
-                alert("Erro ao salvar MP3 no Firebase.");
+                const code = err && err.code ? String(err.code) : '';
+                const msg = err && err.message ? String(err.message) : '';
+                console.error("Erro ao salvar MP3 no banco:", err);
+                alert(`Erro ao salvar MP3 no banco.\n${code ? `Código: ${code}\n` : ''}${msg ? `Detalhe: ${msg}` : ''}`);
             }
         };
-
-        async function handleFile(file) {
-            if (!file || file.type !== 'application/pdf') {
-                alert("Por favor, selecione um arquivo PDF.");
-                return;
-            }
-
-            dropArea.innerHTML = `<i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i><p>Analisando arquivo e extraindo capa...</p>`;
-
-            // 1. Initial Metadata from Filename (Fallback)
-            const name = file.name.replace('.pdf', '');
-            let title = name, author = 'Desconhecido', year = '';
-
-            if (name.includes(' - ')) {
-                const parts = name.split(' - ');
-                author = parts[0];
-                title = parts[1];
-                if (title.includes('(') && title.includes(')')) {
-                    year = title.match(/\((\d{4})\)/)?.[1] || '';
-                    title = title.replace(/\(\d{4}\)/, '').trim();
-                }
-            } else if (name.includes('_')) {
-                const parts = name.split('_');
-                title = parts[0];
-                author = parts[parts.length - 1];
-            }
-
-            // 2. Extract Metadata & Cover via PDF.js
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-                const pdfDoc = await loadingTask.promise;
-                
-                const metadata = await pdfDoc.getMetadata();
-                const info = metadata.info;
-                
-                // Use PDF metadata if available
-                if (info.Title && info.Title.trim().length > 2) title = info.Title;
-                if (info.Author && info.Author.trim().length > 2) author = info.Author;
-                
-                // Set page count
-                document.getElementById('form-pages').value = pdfDoc.numPages;
-
-                // --- NEW: EXTRACT FIRST PAGE AS COVER ---
-                const firstPage = await pdfDoc.getPage(1);
-                const viewport = firstPage.getViewport({ scale: 0.5 }); // Thumbnail size
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-                await firstPage.render({ canvasContext: context, viewport: viewport }).promise;
-                window.currentUploadCover = canvas.toDataURL('image/jpeg', 0.8);
-                // ----------------------------------------
-
-                // 3. Search for ISBN and Description in the first 3 pages
-                let fullText = '';
-                const pagesToScan = Math.min(pdfDoc.numPages, 3);
-                for (let i = 1; i <= pagesToScan; i++) {
-                    const page = await pdfDoc.getPage(i);
-                    const textContent = await page.getTextContent();
-                    fullText += textContent.items.map(item => item.str).join(' ') + ' ';
-                }
-
-                // ISBN Regex
-                const isbnRegex = /(?:ISBN(?:-1[03])?:?\s+)?(?=[0-9X\s-]{10,17}$|(?=[0-9X\s-]{10,17})[0-9]{1,5}[-\s]?[0-9]+[-\s]?[0-9]+[-\s]?[0-9]+[-\s]?[0-9X])(?:97[89][-\s]?)?[0-9]{1,5}[-\s]?[0-9]+[-\s]?[0-9]+[-\s]?[0-9]+[-\s]?[0-9X]/i;
-                const isbnMatch = fullText.match(isbnRegex);
-                if (isbnMatch) {
-                    document.getElementById('form-isbn').value = isbnMatch[0].replace(/ISBN:?\s+/i, '').trim();
-                }
-
-                // Try to find Publisher
-                const publisherKeywords = ['Editora', 'Publisher', 'Published by', 'Publicado por'];
-                for (const keyword of publisherKeywords) {
-                    const index = fullText.indexOf(keyword);
-                    if (index !== -1) {
-                        const fragment = fullText.substring(index, index + 50);
-                        const match = fragment.match(new RegExp(`${keyword}[:\\s]+([^\\n,.;]+)`, 'i'));
-                        if (match && match[1]) {
-                            document.getElementById('form-publisher').value = match[1].trim();
-                            break;
-                        }
-                    }
-                }
-
-                // Update form with basic info
-                document.getElementById('form-title').value = title;
-                document.getElementById('form-author').value = author;
-                if (year) document.getElementById('form-year').value = year;
-
-                // Description fallback
-                if (fullText.length > 50) {
-                    document.getElementById('form-description').value = fullText.substring(0, 300).trim() + '...';
-                }
-
-            } catch (err) {
-                console.error("Erro ao ler PDF:", err);
-            }
-
-            // Store file temporarily
-            window.currentUploadFile = file;
-            dropArea.innerHTML = `<i class="fas fa-check-circle" style="color: green; font-size: 3rem;"></i><p>${file.name} analisado com sucesso! Capa extraída.</p>`;
-        }
 
         const formUrlInput = document.getElementById('form-url');
         if (formUrlInput) {
@@ -3185,6 +2855,11 @@
         document.getElementById('book-form').onsubmit = async (e) => {
             e.preventDefault();
             
+            const externalUrl = (document.getElementById('form-url').value || '').trim();
+            if (!externalUrl) {
+                alert("Para alunos acessarem em qualquer lugar, é obrigatório informar um link externo público do PDF (Google Drive/URL direta).");
+                return;
+            }
             const id = Date.now().toString();
             const newBook = {
                 id,
@@ -3193,7 +2868,7 @@
                 category: document.getElementById('form-category').value,
                 turma: document.getElementById('form-turma').value,
                 modulo: document.getElementById('form-modulo').value,
-                url: document.getElementById('form-url').value,
+                url: externalUrl,
                 year: parseInt(document.getElementById('form-year').value) || 2024,
                 publisher: document.getElementById('form-publisher').value,
                 isbn: document.getElementById('form-isbn').value,
@@ -3208,27 +2883,23 @@
                 dateAdded: Date.now()
             };
 
-            if (window.currentUploadFile) {
-                alert("Atenção: O arquivo local não será sincronizado. Por favor, use links externos (Google Drive) para que outros alunos possam acessar.");
-            }
-
             try {
                 const docId = await fbAdd('books', newBook);
-                books.push({ ...newBook, _docId: docId });
+                books.push({ ...newBook, id: String(docId || id), _docId: (docId || id) });
                 renderHighlights();
                 renderBooksGrid(books);
                 updateStats();
                 updateAdminDashboard();
                 
                 addAuditLog('ADICIONAR_LIVRO', `Livro "${newBook.title}" adicionado ao acervo.`);
-                alert("Livro salvo com sucesso no Firebase!");
+                alert("Livro salvo com sucesso no banco!");
                 e.target.reset();
-                window.currentUploadFile = null;
-                dropArea.innerHTML = `<i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--secondary); margin-bottom: 10px;"></i><p>Apenas link externo (Google Drive) é suportado nesta versão global.</p>`;
                 showAdminTab('manage');
             } catch (err) {
-                console.error("Erro ao salvar Livro no Firebase:", err);
-                alert("Erro ao salvar Livro no Firebase.");
+                const code = err && err.code ? String(err.code) : '';
+                const msg = err && err.message ? String(err.message) : '';
+                console.error("Erro ao salvar Livro no banco:", err);
+                alert(`Erro ao salvar Livro no banco.\n${code ? `Código: ${code}\n` : ''}${msg ? `Detalhe: ${msg}` : ''}`);
             }
         };
 
@@ -3248,7 +2919,7 @@
                     renderHighlights();
                     renderBooksGrid(books);
                 } catch (err) {
-                    console.error("Erro ao excluir livro do Firebase:", err);
+                    console.error("Erro ao excluir livro do banco:", err);
                     alert("Erro ao excluir do banco de dados.");
                 }
             }
