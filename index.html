@@ -721,6 +721,95 @@
             box-shadow: 0 25px 60px rgba(0,0,0,0.35);
         }
 
+        .link-upload-box {
+            border: 2px dashed rgba(54, 121, 98, 0.4);
+            background: rgba(54, 121, 98, 0.06);
+            border-radius: 14px;
+            padding: 18px;
+            margin: 18px 0 22px;
+        }
+
+        .link-upload-box input[type="url"] {
+            width: 100%;
+            height: 52px;
+            padding: 0 16px;
+            border-radius: 12px;
+            border: 2px solid rgba(0,0,0,0.14);
+            background: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .link-upload-box input[type="url"]::placeholder {
+            color: rgba(0,0,0,0.45);
+        }
+
+        .link-upload-box input[type="url"]:focus {
+            border-color: rgba(54, 121, 98, 0.85);
+            box-shadow: 0 0 0 4px rgba(54, 121, 98, 0.15);
+        }
+
+        .link-upload-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .link-upload-title i {
+            color: var(--secondary);
+        }
+
+        .link-upload-tip {
+            color: #777;
+            margin-top: 10px;
+            line-height: 1.35;
+            font-size: 0.9rem;
+        }
+
+        .link-upload-status {
+            margin-top: 12px;
+            font-weight: 700;
+            color: #2e7d32;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .link-upload-status.show {
+            display: flex;
+        }
+
+        .link-preview {
+            margin-top: 12px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.12);
+            background: #000;
+            display: none;
+        }
+
+        .link-preview.show {
+            display: block;
+        }
+
+        .link-preview iframe {
+            width: 100%;
+            height: 360px;
+            border: 0;
+            display: block;
+            background: #000;
+        }
+
+        .link-preview audio {
+            width: 100%;
+            display: block;
+            background: #fff;
+        }
+
         /* --- MP3 GRID & PLAYER --- */
         .mp3-grid {
             display: grid;
@@ -1359,6 +1448,19 @@
                             <div id="tab-upload-mp3" class="hidden">
                                 <h3>Adicionar Novo Mp3</h3>
                                 <form id="mp3-form" novalidate>
+                                    <div class="link-upload-box">
+                                        <div class="link-upload-title">
+                                            <i class="fas fa-link"></i>
+                                            <span>Link do Google Drive (MP3) *</span>
+                                        </div>
+                                        <input type="url" id="mp3-form-url" placeholder="Cole aqui o link de compartilhamento do Google Drive...">
+                                        <div class="link-upload-tip">No Drive: botão direito no arquivo → “Compartilhar” → “Qualquer pessoa com o link pode ver” → “Copiar link”.</div>
+                                        <div id="mp3-link-status" class="link-upload-status"><i class="fas fa-check-circle"></i><span>Link detectado! Você pode preencher os dados abaixo.</span></div>
+                                        <div id="mp3-link-preview" class="link-preview">
+                                            <iframe id="mp3-link-iframe" allow="autoplay"></iframe>
+                                            <audio id="mp3-link-audio" controls></audio>
+                                        </div>
+                                    </div>
                                     <div class="form-grid">
                                         <div class="form-group">
                                             <label>Título *</label>
@@ -1385,11 +1487,6 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label>Link Externo (Google Drive / URL direta)</label>
-                                        <input type="url" id="mp3-form-url" placeholder="https://drive.google.com/file/d/ID/view?usp=sharing">
-                                        <small style="color: #777;">Dica: Use links públicos do Google Drive ou Dropbox.</small>
-                                    </div>
-                                    <div class="form-group">
                                         <label>Descrição</label>
                                         <textarea id="mp3-form-description" rows="3"></textarea>
                                     </div>
@@ -1403,6 +1500,18 @@
                             <div id="tab-upload" class="hidden">
                                 <h3>Adicionar Nova Obra</h3>
                                 <form id="book-form">
+                                    <div class="link-upload-box">
+                                        <div class="link-upload-title">
+                                            <i class="fab fa-google-drive"></i>
+                                            <span>Link do Google Drive (PDF) *</span>
+                                        </div>
+                                        <input type="url" id="form-url" placeholder="Cole aqui o link de compartilhamento do Google Drive...">
+                                        <div class="link-upload-tip">No Drive: botão direito no arquivo → “Compartilhar” → “Qualquer pessoa com o link pode ver” → “Copiar link”.</div>
+                                        <div id="pdf-link-status" class="link-upload-status"><i class="fas fa-check-circle"></i><span>Link do Drive detectado! Preencha os dados abaixo.</span></div>
+                                        <div id="pdf-link-preview" class="link-preview">
+                                            <iframe id="pdf-link-iframe"></iframe>
+                                        </div>
+                                    </div>
                                     <div class="form-grid">
                                         <div class="form-group">
                                             <label>Título *</label>
@@ -1459,10 +1568,6 @@
                                             <label>Nº de Páginas</label>
                                             <input type="number" id="form-pages">
                                         </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Link Externo do PDF (Google Drive / URL direta)</label>
-                                        <input type="url" id="form-url" placeholder="https://drive.google.com/file/d/ID/view?usp=sharing">
                                     </div>
                                     <div class="form-group">
                                         <label>Sinopse / Descrição</label>
@@ -1847,6 +1952,79 @@
                  window.currentUploadCover = null;
              }
          }
+
+        function updatePdfLinkPreview(url) {
+            const status = document.getElementById('pdf-link-status');
+            const preview = document.getElementById('pdf-link-preview');
+            const iframe = document.getElementById('pdf-link-iframe');
+            if (!status || !preview || !iframe) return;
+
+            const value = String(url || '').trim();
+            if (!value) {
+                status.classList.remove('show');
+                preview.classList.remove('show');
+                iframe.src = '';
+                return;
+            }
+
+            const driveId = value.includes('drive.google.com') ? getDriveFileId(value) : null;
+            const msgEl = status.querySelector('span');
+            status.classList.add('show');
+            if (driveId) {
+                if (msgEl) msgEl.textContent = 'Link do Drive detectado! Preencha os dados abaixo.';
+                preview.classList.add('show');
+                const src = `https://drive.google.com/file/d/${driveId}/preview`;
+                if (iframe.src !== src) iframe.src = src;
+                return;
+            }
+
+            if (msgEl) msgEl.textContent = 'Link informado. Prévia disponível apenas para Google Drive.';
+            preview.classList.remove('show');
+            iframe.src = '';
+        }
+
+        function updateMp3LinkPreview(url) {
+            const status = document.getElementById('mp3-link-status');
+            const preview = document.getElementById('mp3-link-preview');
+            const iframe = document.getElementById('mp3-link-iframe');
+            const audio = document.getElementById('mp3-link-audio');
+            if (!status || !preview || !iframe || !audio) return;
+
+            const value = String(url || '').trim();
+            if (!value) {
+                status.classList.remove('show');
+                preview.classList.remove('show');
+                iframe.src = '';
+                audio.pause();
+                audio.src = '';
+                audio.style.display = 'none';
+                iframe.style.display = 'none';
+                return;
+            }
+
+            const driveId = value.includes('drive.google.com') ? getDriveFileId(value) : null;
+            const msgEl = status.querySelector('span');
+            status.classList.add('show');
+            if (driveId) {
+                if (msgEl) msgEl.textContent = 'Link do Drive detectado! Preencha os dados abaixo.';
+                preview.classList.add('show');
+                audio.pause();
+                audio.src = '';
+                audio.style.display = 'none';
+                iframe.style.display = 'block';
+                const src = `https://drive.google.com/file/d/${driveId}/preview`;
+                if (iframe.src !== src) iframe.src = src;
+                return;
+            }
+
+            if (msgEl) msgEl.textContent = 'Link informado. Prévia pode depender do servidor do arquivo.';
+            preview.classList.add('show');
+            iframe.src = '';
+            iframe.style.display = 'none';
+            audio.style.display = 'block';
+            const src = formatExternalUrl(value);
+            if (audio.src !== src) audio.src = src;
+        }
 
         let storageUnavailableWarned = false;
         let isStorageWritable = true;
@@ -2823,6 +3001,7 @@
                 if (urlInput) urlInput.value = url;
                 const titleInput = document.getElementById('form-title');
                 if (titleInput && !titleInput.value) titleInput.value = (fileName || '').replace(/\.pdf$/i, '');
+                updatePdfLinkPreview(url);
                 await extractCoverFromExternalUrl(url);
             }
         }
@@ -2911,6 +3090,14 @@
                 document.querySelector(`.admin-nav li:nth-child(${target.nav})`).classList.add('active');
                 if (tab === 'manage') setAdminManageView('pdf');
                 if (tab === 'audit') renderAuditTable();
+                if (tab === 'upload') {
+                    const url = (document.getElementById('form-url')?.value || '').trim();
+                    updatePdfLinkPreview(url);
+                }
+                if (tab === 'upload-mp3') {
+                    const url = (document.getElementById('mp3-form-url')?.value || '').trim();
+                    updateMp3LinkPreview(url);
+                }
             }
         }
 
@@ -3113,11 +3300,24 @@
 
         const formUrlInput = document.getElementById('form-url');
         if (formUrlInput) {
-            formUrlInput.addEventListener('change', async (e) => {
+            const handler = async (e) => {
                 const url = e.target.value.trim();
+                updatePdfLinkPreview(url);
                 if (!url) return;
                 await extractCoverFromExternalUrl(url);
-            });
+            };
+            formUrlInput.addEventListener('input', handler);
+            formUrlInput.addEventListener('change', handler);
+        }
+
+        const mp3UrlInput = document.getElementById('mp3-form-url');
+        if (mp3UrlInput) {
+            const handler = (e) => {
+                const url = e.target.value.trim();
+                updateMp3LinkPreview(url);
+            };
+            mp3UrlInput.addEventListener('input', handler);
+            mp3UrlInput.addEventListener('change', handler);
         }
 
         document.getElementById('book-form').onsubmit = async (e) => {
